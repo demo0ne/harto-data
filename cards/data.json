@@ -1,0 +1,151 @@
+{
+  "cards": [
+    {
+      "id": "roamingoak",
+      "pack": "Daily",
+      "title": "🌳 Roaming Oak",
+      "description": "One of the 2 limited resources that can only be farmed once a day",
+      "image": "assets/images/Daily/tree.png"
+    },
+    {
+      "id": "flawless",
+      "pack": "Daily",
+      "title": "💎 Flawless Flourite",
+      "description": "One of the 2 limited resources that can only be farmed once a day",
+      "image": "assets/images/Daily/stone.png"
+    },
+    {
+      "id": "daily-quest",
+      "pack": "Daily",
+      "title": "📋 Daily Quest",
+      "description": "5 Daily Quest from Resident NPCs",
+      "image": "assets/images/Daily/daily_tasks.png"
+    },
+    {
+      "id": "animal-care",
+      "pack": "Daily",
+      "title": "🐼 Animal Care",
+      "description": "If you want to level up your animals, add this to your dailies.",
+      "image": "assets/images/Daily/animal_care.png"
+    },
+    {
+      "id": "pet-care",
+      "pack": "Daily",
+      "title": "🐾 Pet Care",
+      "description": "Dog lover? Cat lover? Don't forget to feed your pets",
+      "image": "assets/images/Daily/pet_care.png"
+    },
+    {
+      "id": "rainbow-tree",
+      "pack": "Daily",
+      "title": "🌴 Rainbow Tree",
+      "description": "MLP Collab. Collect Gems from friends then water the tree.",
+      "image": "assets/images/Daily/rainbow_tree.png"
+    },
+    {
+      "id": "egg-machine",
+      "pack": "Daily",
+      "title": "🧺 Egg Machine",
+      "description": "*Winterfrost* event. Grab random items from these baskets. Up to 5 daily.",
+      "image": "assets/images/Daily/placeholder.png"
+    },
+    {
+      "id": "blanc",
+      "pack": "Daily-NPC",
+      "title": "Blanc (Seeds)",
+      "description": "",
+      "image": "assets/images/placeholder.png"
+    },
+    {
+      "id": "massimo",
+      "pack": "Daily-NPC",
+      "title": "Massimo (ingredients)",
+      "description": "",
+      "image": "assets/images/placeholder.png"
+    },
+    {
+      "id": "bob",
+      "pack": "Daily-NPC",
+      "title": "Bob (Furniture)",
+      "description": "",
+      "image": "assets/images/placeholder.png"
+    },
+    {
+      "id": "dorothee",
+      "pack": "Daily-NPC",
+      "title": "Dorothee (Clothing)",
+      "description": "",
+      "image": "assets/images/placeholder.png"
+    },
+    {
+      "id": "ms-joan",
+      "pack": "Daily-NPC",
+      "title": "Ms.Joan (Pet Shop)",
+      "description": "",
+      "image": "assets/images/placeholder.png"
+    },
+    {
+      "id": "ka-ching",
+      "pack": "Daily-NPC",
+      "title": "Ka Ching (Gen.Store)",
+      "description": "",
+      "image": "assets/images/placeholder.png"
+    },
+    {
+      "id": "research-lab",
+      "pack": "Daily-NPC",
+      "title": "Research Lab",
+      "description": "",
+      "image": "assets/images/placeholder.png"
+    },
+    {
+      "id": "bailey-j",
+      "pack": "Daily-NPC",
+      "title": "Bailey J (Submit Info Cards)",
+      "description": "",
+      "image": "assets/images/placeholder.png"
+    },
+    {
+      "id": "pink-bubbles",
+      "pack": "Weekly",
+      "title": "Pink Bubbles",
+      "description": "",
+      "image": "assets/images/placeholder.png"
+    },
+    {
+      "id": "doris-meteor",
+      "pack": "Others",
+      "title": "Doris (Meteor)",
+      "description": "",
+      "image": "assets/images/placeholder.png"
+    },
+    {
+      "id": "doris-rain",
+      "pack": "Others",
+      "title": "Doris (Rain)",
+      "description": "",
+      "image": "assets/images/placeholder.png"
+    },
+    {
+      "id": "doris-rainbow",
+      "pack": "Others",
+      "title": "Doris (Rainbow)",
+      "description": "",
+      "image": "assets/images/placeholder.png"
+    },
+    {
+      "id": "rainbow-bouquet",
+      "pack": "Others",
+      "title": "Rainbow Bouquet",
+      "description": "",
+      "image": "assets/images/placeholder.png"
+    },
+    {
+      "id": "meteor-shards",
+      "pack": "Others",
+      "title": "Meteor Shards",
+      "description": "",
+      "image": "assets/images/placeholder.png"
+    }
+  ]
+}

@@ -1,0 +1,196 @@
+/* Harto - Card-based To-Do for Heartopia */
+/* Version: 0.1.1 */
+
+:root {
+  --card-width: 160px;
+  --card-aspect: 2.5 / 3.5;
+  --card-radius: 8px;
+  --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: #f5f0e8;
+}
+
+/* App shell */
+.harto-app {
+  min-height: 100vh;
+  padding: 1rem;
+}
+
+/* Packs area */
+.harto-packs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.harto-pack {
+  padding: 0.5rem 1rem;
+  background: #fff;
+  border-radius: var(--card-radius);
+  cursor: pointer;
+  box-shadow: var(--card-shadow);
+  font-weight: 500;
+}
+
+.harto-pack:hover {
+  background: #f8f4ed;
+}
+
+/* Deck area */
+.harto-deck {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.harto-deck-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--card-width), 1fr));
+  gap: 1rem;
+}
+
+.harto-deck-section-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #555;
+  margin: 0 0 0.5rem;
+}
+
+.harto-deck-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--card-width), 1fr));
+  gap: 1rem;
+}
+
+/* Card */
+.harto-card {
+  width: var(--card-width);
+  aspect-ratio: var(--card-aspect);
+  background: #fff;
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.3s ease;
+  animation: harto-card-enter 0.3s ease forwards;
+}
+
+.harto-card.harto-card-exit {
+  animation: harto-card-exit 0.3s ease forwards;
+}
+
+@keyframes harto-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes harto-card-exit {
+  to {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.9);
+  }
+}
+
+.harto-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.harto-card-image {
+  width: 100%;
+  height: 40%;
+  object-fit: cover;
+  background: #e8e0d4;
+}
+
+.harto-card-body {
+  padding: 0.5rem 0.75rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.harto-card-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin: 0 0 0.25rem;
+}
+
+.harto-card-description {
+  font-size: 0.75rem;
+  color: #666;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+.harto-card-complete {
+  margin-top: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  background: #7cb342;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.harto-card-complete:hover {
+  background: #689f38;
+}
+
+/* Tabs */
+.harto-tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.harto-tab {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.harto-tab:hover {
+  opacity: 0.8;
+}
+
+.harto-tab.active {
+  border-bottom-color: #7cb342;
+  font-weight: 600;
+}
+
+.harto-tab-panel {
+  display: none;
+}
+
+.harto-tab-panel.active {
+  display: block;
+}
+
+.harto-placeholder {
+  color: #888;
+  padding: 2rem;
+}
