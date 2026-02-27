@@ -6,6 +6,7 @@
 const CDN = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
 const VERSION = '0.2.0';
 const STORAGE_COMPLETIONS = 'harto_completions';
+const STORAGE_THEME = 'harto_theme';
 
 function getToday() {
   const d = new Date();
@@ -78,15 +79,20 @@ function uncompleteCard(cardId) {
 
 function renderCard(card, completions, done, index) {
   const imgSrc = card.image ? (card.image.startsWith('http') ? card.image : `${CDN}/${card.image}`) : '';
-  const btnIcon = done ? '↶' : '✓';
+  const approvedUrl = `${CDN}/assets/images/approved.png`;
+  const btnIcon = done ? '✓' : '';
+  const approvedOverlay = done ? `<div class="harto-card-approved" style="background-image: url('${approvedUrl}')"></div>` : '';
   return `
     <div class="harto-card harto-card-dealing ${done ? 'harto-card-completed' : ''}" data-id="${escapeHtml(card.id)}" data-pack="${escapeHtml(card.pack)}" data-deal-index="${index >= 0 ? index : 0}">
-      <h3 class="harto-card-title">${escapeHtml(card.title)}</h3>
-      <img class="harto-card-image" src="${imgSrc || ''}" alt="" onerror="this.style.display='none'">
-      <div class="harto-card-body">
+      <div class="harto-card-content">
+        <h3 class="harto-card-title">${escapeHtml(card.title)}</h3>
+        <img class="harto-card-image" src="${imgSrc || ''}" alt="" onerror="this.style.display='none'">
+        <div class="harto-card-body">
         ${card.description ? `<p class="harto-card-description">${escapeHtml(card.description)}</p>` : ''}
         <button class="harto-card-complete" data-action="${done ? 'uncomplete' : 'complete'}" title="${done ? 'Undo' : 'Complete'}">${btnIcon}</button>
+        </div>
       </div>
+      ${approvedOverlay}
     </div>
   `;
 }
@@ -231,6 +237,24 @@ async function init() {
   console.log(`Harto v${VERSION}`);
 }
 
+function initTheme() {
+  const stored = localStorage.getItem(STORAGE_THEME);
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const dark = stored === 'dark' || (!stored && prefersDark);
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  const btn = document.getElementById('harto-theme-toggle');
+  if (btn) {
+    btn.textContent = dark ? '☀' : '🌙';
+    btn.addEventListener('click', () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const next = isDark ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem(STORAGE_THEME, next);
+      btn.textContent = next === 'dark' ? '☀' : '🌙';
+    });
+  }
+}
+
 function initTabs() {
   document.querySelectorAll('.harto-tab').forEach((tab) => {
     tab.addEventListener('click', () => {
@@ -246,10 +270,12 @@ function initTabs() {
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
     initTabs();
     init();
   });
 } else {
+  initTheme();
   initTabs();
   init();
 }

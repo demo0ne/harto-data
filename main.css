@@ -7,15 +7,43 @@
   --card-radius: 12px;
   --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   --card-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.12);
-  --accent: #5a9c3a;
-  --accent-hover: #4a8530;
-  --accent-soft: rgba(90, 156, 58, 0.12);
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --accent-soft: rgba(59, 130, 246, 0.12);
   --bg: #f8f9fa;
   --surface: #ffffff;
   --text: #2d3748;
   --text-muted: #64748b;
   --border: #e2e8f0;
   --completed-bg: #f1f5f9;
+  --body-bg: linear-gradient(135deg, #f0f4e8 0%, #f8faf5 50%, #f5f7f2 100%);
+}
+
+[data-theme="dark"] {
+  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --card-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --accent: #60a5fa;
+  --accent-hover: #3b82f6;
+  --accent-soft: rgba(96, 165, 250, 0.2);
+  --bg: #1a1d21;
+  --surface: #252930;
+  --text: #e4e6eb;
+  --text-muted: #b0b3b8;
+  --border: #3a3f47;
+  --completed-bg: #1e2228;
+  --body-bg: linear-gradient(135deg, #1a1d21 0%, #15181c 50%, #1d2126 100%);
+}
+
+[data-theme="dark"] .harto-tab-badge,
+[data-theme="dark"] .harto-pack-badge {
+  background: #2563eb;
+  color: #fff !important;
+}
+
+[data-theme="dark"] .harto-pack.active {
+  background: #2563eb;
+  color: #fff !important;
+  border-color: #2563eb;
 }
 
 * {
@@ -25,10 +53,43 @@
 body {
   margin: 0;
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background: linear-gradient(135deg, #f0f4e8 0%, #f8faf5 50%, #f5f7f2 100%);
+  background: var(--body-bg);
   min-height: 100vh;
   color: var(--text);
   -webkit-font-smoothing: antialiased;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+/* Header */
+.harto-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+.harto-theme-toggle {
+  flex-shrink: 0;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--card-shadow);
+  transition: background 0.2s, color 0.2s;
+}
+
+.harto-theme-toggle:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 /* App shell */
@@ -140,6 +201,13 @@ body {
   position: relative;
 }
 
+.harto-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .harto-card.harto-card-dealing {
   opacity: 0;
   pointer-events: none;
@@ -150,6 +218,10 @@ body {
   animation-delay: 0s;
 }
 
+.harto-card.harto-card-completed .harto-card-content {
+  filter: grayscale(1);
+}
+
 .harto-card.harto-card-completed {
   background: var(--completed-bg);
 }
@@ -157,6 +229,19 @@ body {
 .harto-card.harto-card-completed .harto-card-title {
   text-decoration: line-through;
   color: var(--text-muted);
+}
+
+.harto-card-approved {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  width: 3rem;
+  height: 3rem;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+  z-index: 2;
 }
 
 @keyframes harto-card-exit {
@@ -219,9 +304,9 @@ body {
   height: 26px;
   padding: 0;
   border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
-  border: none;
+  background: transparent;
+  color: var(--accent);
+  border: 2px solid var(--accent);
   cursor: pointer;
   font-size: 0.9rem;
   display: flex;
@@ -229,7 +314,7 @@ body {
   justify-content: center;
   opacity: 0;
   transform: scale(0.8);
-  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   align-self: center;
   margin-top: auto;
 }
@@ -239,23 +324,31 @@ body {
   transform: scale(1);
 }
 
-.harto-card-complete:hover {
-  background: var(--accent-hover);
+.harto-card-complete[data-action="complete"]:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.harto-card-complete[data-action="complete"]:hover::after {
+  content: '✓';
 }
 
 .harto-card-complete[data-action="uncomplete"] {
-  background: var(--text-muted);
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
 }
 
 .harto-card-complete[data-action="uncomplete"]:hover {
-  background: var(--text);
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
 }
 
 /* Tabs */
 .harto-tabs {
   display: flex;
   gap: 0;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0;
   border-bottom: 2px solid var(--border);
 }
 
