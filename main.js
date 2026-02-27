@@ -1,14 +1,15 @@
 /**
  * Harto - Card-based To-Do for Heartopia
- * Version: 0.6.2
+ * Version: 0.6.7
  */
 
 const CDN = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
-const VERSION = '0.6.2';
+const VERSION = '0.6.7';
 const STORAGE_COMPLETIONS = 'harto_completions';
 const STORAGE_COMPLETIONS_TW = 'harto_completions_tw';
 const STORAGE_THEME = 'harto_theme';
 const STORAGE_SETUP = 'harto_setup';
+const STORAGE_TASK_VIEW = 'harto_task_view';
 // harto_admin: read-only from app; set manually in browser localStorage to 'true' for admin mode
 
 function isAdmin() {
@@ -18,6 +19,15 @@ function isAdmin() {
 function getSetup() {
   const s = localStorage.getItem(STORAGE_SETUP) || 'SEA';
   return s === 'TW' ? 'TW' : 'SEA';
+}
+
+function getTaskView() {
+  const s = localStorage.getItem(STORAGE_TASK_VIEW) || 'card';
+  return s === 'list' ? 'list' : 'card';
+}
+
+function setTaskView(view) {
+  localStorage.setItem(STORAGE_TASK_VIEW, view === 'list' ? 'list' : 'card');
 }
 
 function getStorageCompletions() {
@@ -199,18 +209,19 @@ function renderCard(card, completions, done, index) {
         return `<button type="button" class="harto-card-step ${checked ? 'checked' : ''}" data-step="${i}" aria-label="Step ${i + 1}">${checked ? '✓' : ''}</button>`;
       }).join('') + '</div>';
   }
-  const mainBtn = !isStepCard
-    ? `<button class="harto-card-complete" data-action="${done ? 'uncomplete' : 'complete'}" title="${done ? 'Undo' : 'Complete'}">${done ? '✓' : ''}</button>`
-    : (done ? `<button class="harto-card-complete" data-action="uncomplete" title="Undo">✓</button>` : stepsHtml);
+  const completeBtn = `<button class="harto-card-complete" data-action="${done ? 'uncomplete' : 'complete'}" title="${done ? 'Undo' : 'Complete'}">${done ? '✓' : ''}</button>`;
   const approvedOverlay = done ? `<div class="harto-card-approved" style="background-image: url('${approvedUrl}')"></div>` : '';
   return `
     <div class="harto-card harto-card-dealing ${done ? 'harto-card-completed' : ''}" data-id="${escapeHtml(card.id)}" data-pack="${escapeHtml(card.pack)}" data-deal-index="${index >= 0 ? index : 0}">
       <div class="harto-card-content">
-        <h3 class="harto-card-title">${escapeHtml(card.title)}</h3>
+        <div class="harto-card-title-row">
+          <h3 class="harto-card-title">${escapeHtml(card.title)}</h3>
+          ${completeBtn}
+        </div>
         <img class="harto-card-image" src="${imgSrc || ''}" alt="" onerror="this.style.display='none'">
         <div class="harto-card-body">
         ${card.description ? `<p class="harto-card-description">${escapeHtml(card.description)}</p>` : ''}
-        ${mainBtn}
+        ${isStepCard ? stepsHtml : ''}
         </div>
       </div>
       ${approvedOverlay}
@@ -331,7 +342,7 @@ function renderPack(packName, hasCompleted) {
   return `
     <div class="harto-deck-pack" data-pack="${escapeHtml(packName)}" role="button" tabindex="0" aria-label="Toggle completed cards">
       <div class="harto-deck-pack-content">
-        <h3 class="harto-deck-pack-title">${escapeHtml(packName)}</h3>
+        <h3 class="harto-deck-pack-title">${escapeHtml(packName)} · Completed</h3>
         <img class="harto-deck-pack-image" src="${imgSrc}" alt="" onerror="this.style.display='none'">
       </div>
       ${approvedOverlay}
@@ -395,6 +406,8 @@ function render(opts) {
   if (tasksTab) {
     tasksTab.innerHTML = 'Tasks' + (pendingCount > 0 ? ` <span class="harto-tab-badge">${pendingCount}</span>` : '');
   }
+
+  deckEl.classList.toggle('harto-deck-view-list', getTaskView() === 'list');
 
   packsEl.innerHTML = PACKS.map((pack) => {
     const count = (byPack.incomplete[pack] || []).length;
@@ -649,7 +662,10 @@ function createShell() {
         </nav>
       </header>
       <div id="harto-tasks" class="harto-tab-panel active">
-        <div id="harto-packs" class="harto-packs"></div>
+        <div class="harto-tasks-toolbar">
+          <div id="harto-packs" class="harto-packs"></div>
+          <button id="harto-view-toggle" class="harto-view-toggle" title="Toggle card/list view" aria-label="Toggle card/list view">⊞</button>
+        </div>
         <div id="harto-deck" class="harto-deck"></div>
       </div>
       <div id="harto-guides" class="harto-tab-panel">
@@ -730,6 +746,23 @@ function initSetup() {
   }
 }
 
+function initViewToggle() {
+  const btn = document.getElementById('harto-view-toggle');
+  const deckEl = document.getElementById('harto-deck');
+  if (!btn || !deckEl) return;
+  function updateLabel() {
+    btn.textContent = getTaskView() === 'card' ? '≡' : '⊞';
+    btn.title = getTaskView() === 'card' ? 'Switch to list view' : 'Switch to card view';
+  }
+  updateLabel();
+  btn.addEventListener('click', () => {
+    const next = getTaskView() === 'card' ? 'list' : 'card';
+    setTaskView(next);
+    deckEl.classList.toggle('harto-deck-view-list', next === 'list');
+    updateLabel();
+  });
+}
+
 function initTabs() {
   document.querySelectorAll('.harto-tab').forEach((tab) => {
     tab.addEventListener('click', () => {
@@ -750,6 +783,7 @@ if (document.readyState === 'loading') {
     initTheme();
     initClock();
     initTabs();
+    initViewToggle();
     init();
   });
 } else {
@@ -758,5 +792,6 @@ if (document.readyState === 'loading') {
   initTheme();
   initClock();
   initTabs();
+  initViewToggle();
   init();
 }

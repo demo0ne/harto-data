@@ -1,5 +1,5 @@
 /* Harto - Card-based To-Do for Heartopia */
-/* Version: 0.6.0 */
+/* Version: 0.6.7 */
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
 
@@ -44,7 +44,8 @@
 }
 
 [data-theme="dark"] .harto-tab-badge,
-[data-theme="dark"] .harto-pack-badge {
+[data-theme="dark"] .harto-pack-badge,
+[data-theme="dark"] .harto-card-step.checked {
   background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
   color: #fff !important;
 }
@@ -144,7 +145,8 @@
 }
 
 [data-setup="TW"] .harto-tab-badge,
-[data-setup="TW"] .harto-pack-badge {
+[data-setup="TW"] .harto-pack-badge,
+[data-setup="TW"] .harto-card-step.checked {
   background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
   color: #fff !important;
 }
@@ -443,13 +445,47 @@ html:not([data-theme="dark"]) .harto-topbar {
   margin: 0 auto;
 }
 
+/* Tasks toolbar */
+.harto-tasks-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0;
+}
+
+.harto-view-toggle {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  transition: all 0.2s ease;
+}
+
+.harto-view-toggle:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
 /* Packs area */
 .harto-packs {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 1.5rem;
-  padding: 0.75rem 0;
+  flex: 1;
 }
 
 .harto-pack {
@@ -512,6 +548,79 @@ html:not([data-theme="dark"]) .harto-topbar {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--card-width), 1fr));
   gap: 1.25rem;
+}
+
+/* List view */
+.harto-deck-view-list .harto-deck-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.harto-deck-view-list .harto-card {
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: unset;
+  min-height: 4rem;
+  flex-direction: row;
+}
+
+.harto-deck-view-list .harto-card-content {
+  flex-direction: row;
+  flex: 1;
+  min-width: 0;
+}
+
+.harto-deck-view-list .harto-card-title-row {
+  flex: 1;
+  order: 0;
+}
+
+.harto-deck-view-list .harto-card-image {
+  width: 4rem;
+  min-width: 4rem;
+  height: 4rem;
+  flex: 0 0 4rem;
+  object-fit: cover;
+}
+
+.harto-deck-view-list .harto-card-body {
+  display: none;
+}
+
+.harto-deck-view-list .harto-card:hover {
+  transform: none;
+  box-shadow: var(--card-shadow-hover);
+}
+
+.harto-deck-view-list .harto-deck-pack {
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: unset;
+  min-height: 3.5rem;
+  flex-direction: row;
+}
+
+.harto-deck-view-list .harto-deck-pack-content {
+  flex-direction: row;
+  align-items: center;
+  flex: 1;
+}
+
+.harto-deck-view-list .harto-deck-pack-title {
+  order: 0;
+}
+
+.harto-deck-view-list .harto-deck-pack-image {
+  width: 3rem;
+  min-width: 3rem;
+  height: 3rem;
+  flex: 0 0 3rem;
+  order: -1;
+}
+
+.harto-deck-view-list .harto-card .harto-card-image {
+  order: -1;
 }
 
 .harto-deck-pack {
@@ -669,14 +778,31 @@ html:not([data-theme="dark"]) .harto-topbar {
   box-shadow: var(--card-shadow-hover);
 }
 
+.harto-card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  order: -1;
+  flex-shrink: 0;
+}
+
+.harto-card-title-row .harto-card-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.harto-card-title-row .harto-card-complete {
+  flex-shrink: 0;
+  margin: 0;
+}
+
 .harto-card-title {
   font-weight: 600;
   font-size: 0.9rem;
   margin: 0;
-  padding: 0.5rem 0.75rem;
+  padding: 0;
   line-height: 1.3;
-  order: -1;
-  flex-shrink: 0;
 }
 
 .harto-card-image {
@@ -728,19 +854,18 @@ html:not([data-theme="dark"]) .harto-topbar {
   opacity: 0;
   transform: scale(0.85);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  align-self: center;
-  margin-top: auto;
 }
 
+.harto-card:hover .harto-card-title-row .harto-card-complete,
 .harto-card:hover .harto-card-complete {
   opacity: 1;
   transform: scale(1);
 }
 
 .harto-card-complete[data-action="complete"]:hover {
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-purple) 100%);
-  color: #fff;
-  border-color: transparent;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent);
   transform: scale(1.08);
 }
 
@@ -762,21 +887,21 @@ html:not([data-theme="dark"]) .harto-topbar {
 
 .harto-card-steps {
   display: flex;
-  gap: 0.35rem;
+  gap: 0.25rem;
   justify-content: center;
   flex-wrap: wrap;
   margin-top: 0.5rem;
 }
 
 .harto-card-step {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.1rem;
+  height: 1.1rem;
   padding: 0;
   border-radius: 50%;
-  border: 2px solid var(--accent);
+  border: 1.5px solid var(--accent);
   background: transparent;
   color: var(--accent);
-  font-size: 0.7rem;
+  font-size: 0.55rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -786,13 +911,19 @@ html:not([data-theme="dark"]) .harto-topbar {
 
 .harto-card-step:hover {
   background: var(--accent-soft);
-  transform: scale(1.1);
+  transform: scale(1.15);
+}
+
+.harto-card-step:not(.checked):hover::after {
+  content: '✓';
 }
 
 .harto-card-step.checked {
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-purple) 100%);
   color: #fff;
+  font-weight: 700;
   border-color: transparent;
+  -webkit-text-stroke: 0.5px rgba(0, 0, 0, 0.3);
 }
 
 /* Tabs */

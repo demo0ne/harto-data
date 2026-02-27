@@ -78,9 +78,14 @@
     {
       "id": "dorothee",
       "pack": "Daily-NPC",
-      "title": "Dorothee (Clothing)",
-      "description": "",
-      "image": "assets/images/placeholder.png"
+      "title": "👕 Dorothee",
+      "description": "Clothing Store. 🛍️ Shop away",
+      "image": "assets/images/Daily-NPC/dorothee.jpg",
+      "season": "always",
+      "weather": "any",
+      "time": "all",
+      "active": true,
+      "steps": 0
     },
     {
       "id": "ms-joan",
@@ -127,7 +132,12 @@
       "pack": "Others",
       "title": "Doris (Meteor)",
       "description": "",
-      "image": "assets/images/placeholder.png"
+      "image": "assets/images/placeholder.png",
+      "season": "always",
+      "weather": "meteor",
+      "time": "all",
+      "active": true,
+      "steps": 0
     },
     {
       "id": "doris-rain",
