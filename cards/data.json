@@ -132,9 +132,14 @@
     {
       "id": "ka-ching",
       "pack": "Daily-NPC",
-      "title": "Ka Ching (Gen.Store)",
-      "description": "",
-      "image": "assets/images/placeholder.png"
+      "title": "🧩 Ka Ching",
+      "description": "Gen. Merch Store. Check daily puzzle.",
+      "image": "assets/images/Daily-NPC/kaching.png",
+      "season": "always",
+      "weather": "any",
+      "time": "all",
+      "active": true,
+      "steps": 0
     },
     {
       "id": "research-lab",
@@ -151,22 +156,32 @@
     {
       "id": "bailey-j",
       "pack": "Daily-NPC",
-      "title": "Bailey J (Submit Info Cards)",
-      "description": "",
-      "image": "assets/images/placeholder.png"
+      "title": "💾 Bailey J",
+      "description": "🕊️ The higher you fly...  Submit info cards daily.",
+      "image": "assets/images/Daily-NPC/baileyj.png",
+      "season": "always",
+      "weather": "any",
+      "time": "all",
+      "active": true,
+      "steps": 0
     },
     {
       "id": "pink-bubbles",
       "pack": "Weekly",
-      "title": "Pink Bubbles",
-      "description": "",
-      "image": "assets/images/Weekly/pink_bubbles.png"
+      "title": "🫧 Pink Bubbles",
+      "description": "\"Gotta pop'em all. \" All 15 of them.",
+      "image": "assets/images/Weekly/pink_bubbles.png",
+      "season": "always",
+      "weather": "any",
+      "time": "all",
+      "active": true,
+      "steps": 0
     },
     {
       "id": "doris-meteor",
-      "pack": "Others",
-      "title": "Doris (Meteor)",
-      "description": "",
+      "pack": "Daily",
+      "title": "🌠 Doris (Meteor)",
+      "description": "Found in the bus station where the meteor is. Buy meteor-themed furniture using shards.",
       "image": "assets/images/placeholder.png",
       "season": "always",
       "weather": "meteor",
@@ -176,24 +191,39 @@
     },
     {
       "id": "doris-rain",
-      "pack": "Others",
-      "title": "Doris (Rain)",
-      "description": "",
-      "image": "assets/images/placeholder.png"
+      "pack": "Daily",
+      "title": "☔ Doris",
+      "description": "Found in Art Street in Town Center. Buy Roll Cake Recipe and Rainbow Sugar ingredient for the cake.",
+      "image": "assets/images/placeholder.png",
+      "season": "always",
+      "weather": "rain",
+      "time": "all",
+      "active": true,
+      "steps": 0
     },
     {
       "id": "doris-rainbow",
-      "pack": "Others",
-      "title": "Doris (Rainbow)",
-      "description": "",
-      "image": "assets/images/placeholder.png"
+      "pack": "Daily",
+      "title": "🌈 Doris",
+      "description": "Found in the bus station where the rainbow is. Buy rainbow sugars.",
+      "image": "assets/images/placeholder.png",
+      "season": "always",
+      "weather": "rainbow",
+      "time": "all",
+      "active": true,
+      "steps": 0
     },
     {
       "id": "rainbow-bouquet",
       "pack": "Others",
-      "title": "Rainbow Bouquet",
-      "description": "",
-      "image": "assets/images/placeholder.png"
+      "title": "🌈 Bouquet💐",
+      "description": "Pop 3 rainbow bouquet. One in front of your home. and the other 2 near the 🌈",
+      "image": "assets/images/placeholder.png",
+      "season": "always",
+      "weather": "rainbow",
+      "time": "all",
+      "active": true,
+      "steps": 0
     },
     {
       "id": "meteor-shards",

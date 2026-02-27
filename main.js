@@ -1,10 +1,11 @@
 /**
  * Harto - Card-based To-Do for Heartopia
- * Version: 0.7.6
+ * Version: 0.7.7
  */
 
 const CDN = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
-const VERSION = '0.7.6';
+const VERSION = '0.7.7';
+if (typeof window !== 'undefined') window.__HARTO_VERSION_JS = VERSION;
 const STORAGE_COMPLETIONS = 'harto_completions';
 const STORAGE_COMPLETIONS_TW = 'harto_completions_tw';
 const STORAGE_THEME = 'harto_theme';
@@ -945,6 +946,46 @@ function initViewToggle() {
   });
 }
 
+function parseVersionFromCss(text) {
+  const m = (text || '').match(/Version:\s*([\d.]+)/);
+  return m ? m[1] : '?';
+}
+
+function buildVersionReport(jsVer, cssVer) {
+  return `main.js: ${jsVer}\nmain.css: ${cssVer}`;
+}
+
+function initVersionToast() {
+  const topbar = document.querySelector('.harto-topbar');
+  if (!topbar) return;
+  topbar.style.cursor = 'pointer';
+  topbar.addEventListener('dblclick', async () => {
+    const base = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
+    let cssVer = '?';
+    try {
+      const res = await fetch(`${base}/main.css`);
+      if (res.ok) cssVer = parseVersionFromCss(await res.text());
+    } catch (_) {}
+    const report = buildVersionReport(VERSION, cssVer);
+    try {
+      await navigator.clipboard.writeText(report);
+    } catch (_) {}
+    const existing = document.getElementById('harto-version-toast');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.id = 'harto-version-toast';
+    toast.className = 'harto-version-toast';
+    toast.innerHTML = `<pre>${report.replace(/</g, '&lt;')}</pre><button class="harto-version-toast-dismiss" aria-label="Dismiss">×</button>`;
+    document.body.appendChild(toast);
+    const dismiss = () => {
+      toast.classList.add('harto-version-toast-hide');
+      setTimeout(() => toast.remove(), 300);
+    };
+    toast.querySelector('.harto-version-toast-dismiss').addEventListener('click', dismiss);
+    setTimeout(dismiss, 4000);
+  });
+}
+
 function initTabs() {
   document.querySelectorAll('.harto-tab').forEach((tab) => {
     tab.addEventListener('click', () => {
@@ -966,6 +1007,7 @@ if (document.readyState === 'loading') {
     initClock();
     initTabs();
     initViewToggle();
+    initVersionToast();
     initResetCompleted();
     init();
   });
@@ -976,6 +1018,7 @@ if (document.readyState === 'loading') {
   initClock();
   initTabs();
   initViewToggle();
+  initVersionToast();
   initResetCompleted();
   init();
 }

@@ -1,5 +1,5 @@
 /* Harto - Card-based To-Do for Heartopia */
-/* Version: 0.7.3 */
+/* Version: 0.7.4 */
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
 
@@ -1327,4 +1327,84 @@ html:not([data-theme="dark"]) .harto-topbar {
   color: var(--text-muted);
   padding: 3rem 2rem;
   text-align: center;
+}
+
+/* Version toast - double-click header */
+.harto-version-toast {
+  position: fixed;
+  top: 3.5rem;
+  left: 1.5rem;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  font-size: 0.85rem;
+  color: var(--text);
+  animation: harto-toast-in 0.25s ease-out;
+}
+
+[data-theme="dark"] .harto-version-toast {
+  background: var(--surface);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.harto-version-toast pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.harto-version-toast-dismiss {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.harto-version-toast-dismiss:hover {
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="dark"] .harto-version-toast-dismiss:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.harto-version-toast-hide {
+  animation: harto-toast-out 0.25s ease-in forwards;
+}
+
+@keyframes harto-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes harto-toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
 }
