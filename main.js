@@ -1,10 +1,10 @@
 /**
  * Harto - Card-based To-Do for Heartopia
- * Version: 0.6.0
+ * Version: 0.6.2
  */
 
 const CDN = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
-const VERSION = '0.6.0';
+const VERSION = '0.6.2';
 const STORAGE_COMPLETIONS = 'harto_completions';
 const STORAGE_COMPLETIONS_TW = 'harto_completions_tw';
 const STORAGE_THEME = 'harto_theme';
@@ -264,7 +264,7 @@ function playDealAnimation(deckEl) {
 
       setTimeout(() => {
         packEl.classList.remove('harto-pack-dealing');
-        if (completedContainer && window.__HARTO_PACK_EXPANDED?.[section.dataset.pack]]) {
+        if (completedContainer && window.__HARTO_PACK_EXPANDED?.[section.dataset.pack]) {
           completedContainer.classList.add('harto-deck-completed-visible');
         }
         completedContainer?.querySelectorAll('.harto-card').forEach((c) => c.classList.remove('harto-card-dealing'));
@@ -408,13 +408,12 @@ function render(opts) {
     const incomplete = byPack.incomplete[pack] || [];
     const completed = byPack.completed[pack] || [];
     if (incomplete.length === 0 && completed.length === 0) return '';
-    const packHtml = renderPack(pack, completed.length > 0);
+    let packHtml = renderPack(pack, completed.length > 0);
+    if (incomplete.length > 0) packHtml = `<span class="harto-card-divider-wrap">${packHtml}</span>`;
     const incompleteHtml = incomplete.map((c, i) => renderCard(c, completions, false, i)).join('');
     const completedCards = completed.map((c, i) => renderCard(c, completions, true, incomplete.length + 1 + i));
     const completedWrapperClass = packExpanded[pack] ? 'harto-deck-completed-visible' : '';
-    const completedInner = completedCards.length > 0 && incomplete.length > 0
-      ? `<span class="harto-card-divider-wrap">${completedCards[0]}</span>` + completedCards.slice(1).join('')
-      : completedCards.join('');
+    const completedInner = completedCards.join('');
     const completedHtml = completedCards.length > 0
       ? `<div class="harto-deck-completed ${completedWrapperClass}" data-pack="${escapeHtml(pack)}">${completedInner}</div>`
       : '';
