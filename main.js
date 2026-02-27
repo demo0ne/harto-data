@@ -130,6 +130,74 @@ function getApprovedUrl() {
   return `${base}/assets/images/approved.png`;
 }
 
+function getCancelledUrl() {
+  const base = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
+  return `${base}/assets/images/cancelled.png`;
+}
+
+function runUncompleteAnimation(cardEl, packEl, cardId, opts) {
+  const imageWrap = cardEl?.querySelector('.harto-card-image-wrap');
+  if (!imageWrap || !packEl) {
+    const completions = getCompletions();
+    delete completions[cardId];
+    setCompletions(completions);
+    render(opts);
+    return;
+  }
+  const approvedEl = imageWrap.querySelector('.harto-card-approved');
+  if (approvedEl) approvedEl.remove();
+  cardEl.classList.remove('harto-card-completed');
+
+  const cancelledEl = document.createElement('div');
+  cancelledEl.className = 'harto-card-approved harto-card-approved-stamping harto-card-cancelled';
+  cancelledEl.style.backgroundImage = `url('${getCancelledUrl()}')`;
+  imageWrap.appendChild(cancelledEl);
+  cardEl.style.zIndex = '10';
+
+  const stampDuration = 420;
+  const wiggleDuration = 280;
+  const flyDuration = 350;
+
+  cancelledEl.animate(
+    [
+      { transform: 'scale(3)', opacity: 0.9 },
+      { transform: 'scale(1)', opacity: 1 }
+    ],
+    { duration: stampDuration, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)', fill: 'forwards' }
+  ).finished.then(() => {
+    cancelledEl.classList.remove('harto-card-approved-stamping');
+    cardEl.animate(
+      [
+        { transform: 'translate(0, 0) rotate(0deg)' },
+        { transform: 'translate(0, 0) rotate(-4deg)' },
+        { transform: 'translate(0, 0) rotate(4deg)' },
+        { transform: 'translate(0, 0) rotate(-2deg)' },
+        { transform: 'translate(0, 0) rotate(0deg)' }
+      ],
+      { duration: wiggleDuration, easing: 'ease-in-out' }
+    ).finished.then(() => {
+      const packRect = packEl.getBoundingClientRect();
+      const cardRect = cardEl.getBoundingClientRect();
+      const dx = packRect.left + packRect.width / 2 - (cardRect.left + cardRect.width / 2);
+      const dy = packRect.top + packRect.height / 2 - (cardRect.top + cardRect.height / 2);
+      cardEl.animate(
+        [
+          { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+          { transform: `translate(${dx}px, ${dy}px) scale(0.3)`, opacity: 0 }
+        ],
+        { duration: flyDuration, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' }
+      ).finished.then(() => {
+        cancelledEl.remove();
+        cardEl.style.zIndex = '';
+        const completions = getCompletions();
+        delete completions[cardId];
+        setCompletions(completions);
+        render(opts);
+      });
+    });
+  });
+}
+
 function runCompleteAnimation(cardEl, packEl, opts) {
   const imageWrap = cardEl?.querySelector('.harto-card-image-wrap');
   if (!imageWrap || !packEl) {
@@ -231,10 +299,17 @@ function toggleStep(cardId, stepIndex, opts) {
 }
 
 function uncompleteCard(cardId, opts) {
-  const completions = getCompletions();
-  delete completions[cardId];
-  setCompletions(completions);
-  render(opts);
+  const section = document.querySelector(`.harto-card[data-id="${cardId}"]`)?.closest('.harto-deck-section');
+  const packEl = section?.querySelector('.harto-deck-pack');
+  const cardEl = document.querySelector(`.harto-card[data-id="${cardId}"]`);
+  if (packEl && cardEl) {
+    runUncompleteAnimation(cardEl, packEl, cardId, opts);
+  } else {
+    const completions = getCompletions();
+    delete completions[cardId];
+    setCompletions(completions);
+    render(opts);
+  }
 }
 
 function renderCard(card, completions, done, index) {
