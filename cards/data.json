@@ -215,7 +215,7 @@
     },
     {
       "id": "rainbow-bouquet",
-      "pack": "Others",
+      "pack": "Daily",
       "title": "🌈 Bouquet💐",
       "description": "Pop 3 rainbow bouquet. One in front of your home. and the other 2 near the 🌈",
       "image": "assets/images/placeholder.png",
@@ -227,10 +227,15 @@
     },
     {
       "id": "meteor-shards",
-      "pack": "Others",
-      "title": "Meteor Shards",
-      "description": "",
-      "image": "assets/images/placeholder.png"
+      "pack": "Daily",
+      "title": "🌠 Meteor Shards",
+      "description": "Gather shards from 9 nodes",
+      "image": "assets/images/placeholder.png",
+      "season": "always",
+      "weather": "meteor",
+      "time": "all",
+      "active": true,
+      "steps": 0
     }
   ]
 }
