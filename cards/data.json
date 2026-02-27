@@ -19,7 +19,7 @@
       "pack": "Daily",
       "title": "📋 Daily Quest",
       "description": "5 Daily Quest from Resident NPCs",
-      "image": "assets/images/Daily/daily_tasks.png"
+      "image": "assets/images/Daily/daily_quest.png"
     },
     {
       "id": "animal-care",
