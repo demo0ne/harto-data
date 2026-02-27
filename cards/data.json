@@ -99,9 +99,14 @@
     {
       "id": "research-lab",
       "pack": "Daily-NPC",
-      "title": "Research Lab",
-      "description": "",
-      "image": "assets/images/placeholder.png"
+      "title": "🔬 Research Lab",
+      "description": "Self-service lab. Check if your research is done or discount in store.",
+      "image": "assets/images/Daily-NPC/research_lab.jpg",
+      "season": "always",
+      "weather": "any",
+      "time": "all",
+      "active": true,
+      "steps": 0
     },
     {
       "id": "bailey-j",

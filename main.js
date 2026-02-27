@@ -114,13 +114,39 @@ function completeCard(cardId, opts) {
   const card = window.__HARTO_CARDS?.find((c) => c.id === cardId);
   const dateKey = card ? getDateKeyForPack(card.pack) : getToday();
   const steps = card?.steps || 0;
+  const stepsDone = steps > 0 ? getStepsCompleted(completions[cardId]) + 1 : 1;
+  const allStepsDone = steps <= 0 || stepsDone >= steps;
+  if (!allStepsDone) {
+    completions[cardId] = { date: dateKey, timestamp: Date.now(), stepsCompleted: stepsDone };
+    setCompletions(completions);
+    render(opts);
+    return;
+  }
   completions[cardId] = {
     date: dateKey,
     timestamp: Date.now(),
     ...(steps > 0 ? { stepsCompleted: steps } : {})
   };
   setCompletions(completions);
-  render(opts);
+
+  const packEl = opts?.flyToPack;
+  const cardEl = document.querySelector(`.harto-card[data-id="${cardId}"]`);
+  if (packEl && cardEl) {
+    const packRect = packEl.getBoundingClientRect();
+    const cardRect = cardEl.getBoundingClientRect();
+    const dx = packRect.left + packRect.width / 2 - (cardRect.left + cardRect.width / 2);
+    const dy = packRect.top + packRect.height / 2 - (cardRect.top + cardRect.height / 2);
+    cardEl.style.zIndex = '10';
+    cardEl.animate(
+      [
+        { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+        { transform: `translate(${dx}px, ${dy}px) scale(0.3)`, opacity: 0 }
+      ],
+      { duration: 350, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' }
+    ).finished.then(() => render(opts));
+  } else {
+    render(opts);
+  }
 }
 
 function toggleStep(cardId, stepIndex, opts) {
@@ -181,42 +207,58 @@ function renderCard(card, completions, done, index) {
 }
 
 function playDealAnimation(deckEl) {
-  const cards = deckEl.querySelectorAll('.harto-card');
-  if (cards.length === 0) return;
-  const deckY = window.innerHeight - 120;
-  const deckX = window.innerWidth / 2;
-  const stagger = 45;
-  const duration = 320;
+  const sections = deckEl.querySelectorAll('.harto-deck-section');
+  const duration = 280;
+  const stagger = 120;
 
-  requestAnimationFrame(() => {
-    const rects = [];
-    cards.forEach((card) => {
-      const rect = card.getBoundingClientRect();
-      rects.push({ card, cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2 });
-    });
+  sections.forEach((section) => {
+    const packEl = section.querySelector('.harto-deck-pack');
+    const cards = Array.from(section.querySelectorAll('.harto-card:not(.harto-card-completed)'));
+    const completedContainer = section.querySelector('.harto-deck-completed');
+    if (completedContainer) {
+      completedContainer.querySelectorAll('.harto-card').forEach((c) => c.classList.add('harto-card-dealing'));
+    }
+    if (!packEl) return;
+
+    cards.forEach((c) => c.classList.add('harto-card-dealing'));
+    packEl.classList.add('harto-pack-dealing');
+
     requestAnimationFrame(() => {
-      rects.forEach(({ card, cx, cy }) => {
-        const idx = parseInt(card.dataset.dealIndex, 10);
-        const dx = deckX - cx;
-        const dy = deckY - cy;
+      const packRect = packEl.getBoundingClientRect();
+      const packX = packRect.left + packRect.width / 2;
+      const packY = packRect.top + packRect.height / 2;
+
+      let delay = 0;
+      cards.forEach((card, idx) => {
+        const rect = card.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const dx = packX - cx;
+        const dy = packY - cy;
 
         card.style.willChange = 'transform, opacity';
         card.animate(
           [
-            { transform: `translate3d(${dx}px, ${dy}px, 0) scale(0.9)`, opacity: 0 },
+            { transform: `translate3d(${dx}px, ${dy}px, 0) scale(0.85)`, opacity: 0 },
             { transform: 'translate3d(0, 0, 0) scale(1)', opacity: 1 }
           ],
-          {
-            duration,
-            delay: idx * stagger,
-            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-            fill: 'forwards'
-          }
+          { duration, delay, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' }
         ).finished.then(() => {
           card.style.willChange = '';
           card.classList.remove('harto-card-dealing');
         });
+        delay += stagger;
       });
+
+      setTimeout(() => {
+        packEl.classList.remove('harto-pack-dealing');
+        if (completedContainer && window.__HARTO_PACK_EXPANDED?.[section.dataset.pack]]) {
+          completedContainer.classList.add('harto-deck-completed-visible');
+          completedContainer.querySelectorAll('.harto-card').forEach((c) => c.classList.remove('harto-card-dealing'));
+        } else if (completedContainer) {
+          completedContainer.querySelectorAll('.harto-card').forEach((c) => c.classList.remove('harto-card-dealing'));
+        }
+      }, delay);
     });
   });
 }
@@ -264,6 +306,26 @@ function escapeHtml(s) {
   const div = document.createElement('div');
   div.textContent = s || '';
   return div.innerHTML;
+}
+
+function packImageSlug(pack) {
+  return (pack || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || 'others';
+}
+
+function renderPack(packName, hasCompleted) {
+  const approvedUrl = `${CDN}/assets/images/approved.png`;
+  const imgSlug = packImageSlug(packName);
+  const imgSrc = `${CDN}/assets/images/${imgSlug}_pack.png`;
+  const approvedOverlay = hasCompleted ? `<div class="harto-card-approved" style="background-image: url('${approvedUrl}')"></div>` : '';
+  return `
+    <div class="harto-deck-pack" data-pack="${escapeHtml(packName)}" role="button" tabindex="0" aria-label="Toggle completed cards">
+      <div class="harto-deck-pack-content">
+        <h3 class="harto-deck-pack-title">${escapeHtml(packName)}</h3>
+        <img class="harto-deck-pack-image" src="${imgSrc}" alt="" onerror="this.style.display='none'">
+      </div>
+      ${approvedOverlay}
+    </div>
+  `;
 }
 
 const PACKS = ['All', 'Daily', 'Daily-NPC', 'Weekly', 'Others'];
@@ -330,24 +392,31 @@ function render(opts) {
   }).join('');
 
   const packsToShow = filterPack === 'All' ? PACKS.slice(1) : [filterPack];
+  const packExpanded = window.__HARTO_PACK_EXPANDED || {};
   deckEl.innerHTML = packsToShow.map((pack) => {
     const incomplete = byPack.incomplete[pack] || [];
     const completed = byPack.completed[pack] || [];
     if (incomplete.length === 0 && completed.length === 0) return '';
+    const packHtml = renderPack(pack, completed.length > 0);
     const incompleteHtml = incomplete.map((c, i) => renderCard(c, completions, false, i)).join('');
-    const completedCards = completed.map((c, i) => renderCard(c, completions, true, incomplete.length + i));
-    const completedHtml = incomplete.length > 0 && completedCards.length > 0
+    const completedCards = completed.map((c, i) => renderCard(c, completions, true, incomplete.length + 1 + i));
+    const completedWrapperClass = packExpanded[pack] ? 'harto-deck-completed-visible' : '';
+    const completedInner = completedCards.length > 0 && incomplete.length > 0
       ? `<span class="harto-card-divider-wrap">${completedCards[0]}</span>` + completedCards.slice(1).join('')
       : completedCards.join('');
+    const completedHtml = completedCards.length > 0
+      ? `<div class="harto-deck-completed ${completedWrapperClass}" data-pack="${escapeHtml(pack)}">${completedInner}</div>`
+      : '';
     return `
       <div class="harto-deck-section" data-pack="${escapeHtml(pack)}">
         <h4 class="harto-deck-section-title">${escapeHtml(pack)}</h4>
         <div class="harto-deck-cards">
-          ${incompleteHtml}${completedHtml}
+          ${incompleteHtml}${packHtml}${completedHtml}
         </div>
       </div>
     `;
   }).filter(Boolean).join('');
+  window.__HARTO_PACK_EXPANDED = packExpanded;
 
   packsEl.querySelectorAll('.harto-pack').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -376,8 +445,60 @@ function render(opts) {
           oldRects.set(c.dataset.id, c.getBoundingClientRect());
         });
       }
-      if (action === 'complete') completeCard(id, { affectedPack: pack, oldRects });
-      else uncompleteCard(id, { affectedPack: pack, oldRects });
+      if (action === 'complete') {
+        const packEl = section?.querySelector('.harto-deck-pack');
+        completeCard(id, { affectedPack: pack, oldRects, flyToPack: packEl });
+      } else uncompleteCard(id, { affectedPack: pack, oldRects });
+    });
+  });
+
+  deckEl.querySelectorAll('.harto-deck-pack').forEach((packEl) => {
+    packEl.addEventListener('click', () => {
+      const pack = packEl.dataset.pack;
+      window.__HARTO_PACK_EXPANDED = window.__HARTO_PACK_EXPANDED || {};
+      const section = packEl.closest('.harto-deck-section');
+      const completedEl = section?.querySelector('.harto-deck-completed');
+      if (!completedEl || completedEl.querySelectorAll('.harto-card').length === 0) return;
+      const isExpanding = !window.__HARTO_PACK_EXPANDED[pack];
+      window.__HARTO_PACK_EXPANDED[pack] = isExpanding;
+      const packRect = packEl.getBoundingClientRect();
+      const cards = Array.from(completedEl.querySelectorAll('.harto-card'));
+      if (isExpanding) {
+        completedEl.classList.add('harto-deck-completed-visible');
+        cards.forEach((card, i) => {
+          const rect = card.getBoundingClientRect();
+          const dx = packRect.left + packRect.width / 2 - (rect.left + rect.width / 2);
+          const dy = packRect.top + packRect.height / 2 - (rect.top + rect.height / 2);
+          card.style.transform = `translate(${dx}px, ${dy}px) scale(0.7)`;
+          card.style.opacity = '0';
+          card.style.transition = 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.35s ease';
+          card.style.transitionDelay = `${i * 60}ms`;
+          requestAnimationFrame(() => {
+            card.style.transform = '';
+            card.style.opacity = '';
+          });
+        });
+        setTimeout(() => cards.forEach((c) => { c.style.transition = ''; c.style.transitionDelay = ''; }), cards.length * 60 + 400);
+      } else {
+        cards.forEach((card, i) => {
+          const rect = card.getBoundingClientRect();
+          const dx = packRect.left + packRect.width / 2 - (rect.left + rect.width / 2);
+          const dy = packRect.top + packRect.height / 2 - (rect.top + rect.height / 2);
+          card.style.transition = 'transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease';
+          card.style.transitionDelay = `${(cards.length - 1 - i) * 50}ms`;
+        });
+        requestAnimationFrame(() => {
+          cards.forEach((card) => {
+            const rect = card.getBoundingClientRect();
+            const dx = packRect.left + packRect.width / 2 - (rect.left + rect.width / 2);
+            const dy = packRect.top + packRect.height / 2 - (rect.top + rect.height / 2);
+            card.style.transform = `translate(${dx}px, ${dy}px) scale(0.7)`;
+            card.style.opacity = '0';
+          });
+          completedEl.classList.remove('harto-deck-completed-visible');
+        });
+        setTimeout(() => cards.forEach((c) => { c.style.transition = ''; c.style.transitionDelay = ''; c.style.transform = ''; c.style.opacity = ''; }), (cards.length - 1) * 50 + 400);
+      }
     });
   });
 
