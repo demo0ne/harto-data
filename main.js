@@ -1,10 +1,10 @@
 /**
  * Harto - Card-based To-Do for Heartopia
- * Version: 0.7.3
+ * Version: 0.7.4
  */
 
 const CDN = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
-const VERSION = '0.7.3';
+const VERSION = '0.7.4';
 const STORAGE_COMPLETIONS = 'harto_completions';
 const STORAGE_COMPLETIONS_TW = 'harto_completions_tw';
 const STORAGE_THEME = 'harto_theme';
@@ -211,6 +211,12 @@ function renderCard(card, completions, done, index) {
   }
   const completeBtn = `<button class="harto-card-complete" data-action="${done ? 'uncomplete' : 'complete'}" title="${done ? 'Undo' : 'Complete'}">${done ? '✓' : ''}</button>`;
   const approvedOverlay = done ? `<div class="harto-card-approved" style="background-image: url('${approvedUrl}')"></div>` : '';
+  const loc = (card.id === 'roamingoak' && __trackerData?.roamingOak?.location)
+    ? __trackerData.roamingOak.location
+    : (card.id === 'flawless' && __trackerData?.flawlessFlourite?.location)
+      ? __trackerData.flawlessFlourite.location
+      : '';
+  const locationOverlay = loc ? `<span class="harto-card-location-overlay"><span class="harto-card-location-badge">${escapeHtml(loc)}</span></span>` : '';
   const season = card.season || 'always';
   const weather = card.weather || 'any';
   const time = card.time || 'all';
@@ -224,7 +230,7 @@ function renderCard(card, completions, done, index) {
       <div class="harto-card-content">
         <div class="harto-card-left">
           <span class="harto-card-complete-wrap">${completeBtn}</span>
-          <div class="harto-card-image-wrap"><img class="harto-card-image" src="${imgSrc || ''}" alt="" onerror="this.style.display='none'"></div>
+          <div class="harto-card-image-wrap"><img class="harto-card-image" src="${imgSrc || ''}" alt="" onerror="this.style.display='none'">${locationOverlay}</div>
         </div>
         <div class="harto-card-right">
           ${isStepCard ? `<div class="harto-card-steps-row">${stepsHtml}</div>` : ''}
@@ -374,6 +380,15 @@ function renderPack(packName, hasCompleted, completedCount, isExpanded) {
 const PACKS = ['All', 'Daily', 'Daily-NPC', 'Weekly', 'Others'];
 
 let __weatherData = null;
+let __trackerData = null;
+
+async function loadTrackerData() {
+  try {
+    const res = await fetch(`${CDN}/info/tracker.json`);
+    const data = await res.json();
+    if (data && typeof data === 'object') __trackerData = data;
+  } catch (_) {}
+}
 
 async function loadWeatherData() {
   try {
@@ -571,7 +586,7 @@ function render(opts) {
 }
 
 async function init() {
-  await loadWeatherData();
+  await Promise.all([loadWeatherData(), loadTrackerData()]);
   const res = await fetch(`${CDN}/cards/data.json`);
   const data = await res.json();
   window.__HARTO_CARDS = data.cards || [];

@@ -1039,9 +1039,30 @@ html:not([data-theme="dark"]) .harto-topbar {
 }
 
 .harto-card-image-wrap {
+  position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
+}
+
+.harto-card-location-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.harto-card-location-badge {
+  padding: 0.5em 0.85em;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 0.5em;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
 .harto-card-image-wrap .harto-card-image {
