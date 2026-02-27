@@ -10,9 +10,14 @@
     {
       "id": "flawless",
       "pack": "Daily",
-      "title": "💎 Flawless Flourite",
+      "title": "💎 F.Flourite",
       "description": "One of the 2 limited resources that can only be farmed once a day",
-      "image": "assets/images/Daily/stone.png"
+      "image": "assets/images/Daily/stone.png",
+      "season": "always",
+      "weather": "any",
+      "time": "all",
+      "active": true,
+      "steps": 0
     },
     {
       "id": "daily-quest",
@@ -79,16 +84,26 @@
     {
       "id": "massimo",
       "pack": "Daily-NPC",
-      "title": "Massimo (ingredients)",
-      "description": "",
-      "image": "assets/images/placeholder.png"
+      "title": "🧑🏽‍🍳 Massimo",
+      "description": "Buy eggs, discounted items, and any time-limited ingredients.",
+      "image": "assets/images/Daily-NPC/massimo.png",
+      "season": "always",
+      "weather": "any",
+      "time": "all",
+      "active": true,
+      "steps": 0
     },
     {
       "id": "bob",
       "pack": "Daily-NPC",
-      "title": "Bob (Furniture)",
+      "title": "🪑 Bob",
       "description": "Bob the builder. Buy furniture and get disappointed.",
-      "image": "assets/images/placeholder.png"
+      "image": "assets/images/Daily-NPC/bob.jpg",
+      "season": "always",
+      "weather": "any",
+      "time": "all",
+      "active": true,
+      "steps": 0
     },
     {
       "id": "dorothee",
@@ -105,9 +120,14 @@
     {
       "id": "ms-joan",
       "pack": "Daily-NPC",
-      "title": "Ms.Joan (Pet Shop)",
-      "description": "",
-      "image": "assets/images/placeholder.png"
+      "title": "🐾 Ms.Joan",
+      "description": "Buy pet foods. Check item shop",
+      "image": "assets/images/Daily-NPC/msjoan.png",
+      "season": "always",
+      "weather": "any",
+      "time": "all",
+      "active": true,
+      "steps": 0
     },
     {
       "id": "ka-ching",
