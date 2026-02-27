@@ -47,12 +47,12 @@
       "pack": "Daily",
       "title": "🧺 Egg Machine",
       "description": "*Winterfrost* event. Grab random items from these baskets. Up to 5 daily.",
-      "image": "assets/images/Daily/placeholder.png"
+      "image": "assets/images/Daily/egg_basket.png"
     },
     {
       "id": "blanc",
       "pack": "Daily-NPC",
-      "title": "Blanc (Seeds)",
+      "title": "🌱 Blanc (Seeds)",
       "description": "",
       "image": "assets/images/placeholder.png"
     },
