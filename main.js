@@ -1,10 +1,10 @@
 /**
  * Harto - Card-based To-Do for Heartopia
- * Version: 0.6.7
+ * Version: 0.7.3
  */
 
 const CDN = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
-const VERSION = '0.6.7';
+const VERSION = '0.7.3';
 const STORAGE_COMPLETIONS = 'harto_completions';
 const STORAGE_COMPLETIONS_TW = 'harto_completions_tw';
 const STORAGE_THEME = 'harto_theme';
@@ -211,17 +211,32 @@ function renderCard(card, completions, done, index) {
   }
   const completeBtn = `<button class="harto-card-complete" data-action="${done ? 'uncomplete' : 'complete'}" title="${done ? 'Undo' : 'Complete'}">${done ? '✓' : ''}</button>`;
   const approvedOverlay = done ? `<div class="harto-card-approved" style="background-image: url('${approvedUrl}')"></div>` : '';
+  const season = card.season || 'always';
+  const weather = card.weather || 'any';
+  const time = card.time || 'all';
+  const metaBadges = `<div class="harto-card-meta">
+    <span class="harto-card-meta-badge" data-meta="season"><span class="harto-card-meta-label">Season:</span> ${escapeHtml(season)}</span>
+    <span class="harto-card-meta-badge" data-meta="weather"><span class="harto-card-meta-label">Weather:</span> ${escapeHtml(weather)}</span>
+    <span class="harto-card-meta-badge" data-meta="time"><span class="harto-card-meta-label">Time:</span> ${escapeHtml(time)}</span>
+  </div>`;
   return `
     <div class="harto-card harto-card-dealing ${done ? 'harto-card-completed' : ''}" data-id="${escapeHtml(card.id)}" data-pack="${escapeHtml(card.pack)}" data-deal-index="${index >= 0 ? index : 0}">
       <div class="harto-card-content">
-        <div class="harto-card-title-row">
-          <h3 class="harto-card-title">${escapeHtml(card.title)}</h3>
-          ${completeBtn}
+        <div class="harto-card-left">
+          <span class="harto-card-complete-wrap">${completeBtn}</span>
+          <div class="harto-card-image-wrap"><img class="harto-card-image" src="${imgSrc || ''}" alt="" onerror="this.style.display='none'"></div>
         </div>
-        <img class="harto-card-image" src="${imgSrc || ''}" alt="" onerror="this.style.display='none'">
-        <div class="harto-card-body">
-        ${card.description ? `<p class="harto-card-description">${escapeHtml(card.description)}</p>` : ''}
-        ${isStepCard ? stepsHtml : ''}
+        <div class="harto-card-right">
+          ${isStepCard ? `<div class="harto-card-steps-row">${stepsHtml}</div>` : ''}
+          <div class="harto-card-title-row">
+            <h3 class="harto-card-title">${escapeHtml(card.title)}</h3>
+            <span class="harto-card-complete-wrap harto-card-complete-inline">${completeBtn}</span>
+          </div>
+          <div class="harto-card-body">
+          ${isStepCard ? stepsHtml : ''}
+          ${card.description ? `<p class="harto-card-description">${escapeHtml(card.description)}</p>` : ''}
+          ${metaBadges}
+          </div>
         </div>
       </div>
       ${approvedOverlay}
@@ -246,7 +261,8 @@ function playDealAnimation(deckEl) {
     cards.forEach((c) => c.classList.add('harto-card-dealing'));
     packEl.classList.add('harto-pack-dealing');
 
-    requestAnimationFrame(() => {
+    const runDeal = () => {
+      requestAnimationFrame(() => {
       const packRect = packEl.getBoundingClientRect();
       const packX = packRect.left + packRect.width / 2;
       const packY = packRect.top + packRect.height / 2;
@@ -280,7 +296,9 @@ function playDealAnimation(deckEl) {
         }
         completedContainer?.querySelectorAll('.harto-card').forEach((c) => c.classList.remove('harto-card-dealing'));
       }, delay + duration);
-    });
+      });
+    };
+    requestAnimationFrame(runDeal);
   });
 }
 
@@ -334,15 +352,18 @@ function packImageSlug(pack) {
   return s.replace(/[^a-z0-9-]/g, '') || 'others';
 }
 
-function renderPack(packName, hasCompleted) {
+function renderPack(packName, hasCompleted, completedCount, isExpanded) {
   const approvedUrl = `${CDN}/assets/images/approved.png`;
   const imgSlug = packImageSlug(packName);
   const imgSrc = `${CDN}/assets/images/${imgSlug}_pack.png`;
   const approvedOverlay = hasCompleted ? `<div class="harto-card-approved" style="background-image: url('${approvedUrl}')"></div>` : '';
+  const countBadge = (hasCompleted && !isExpanded && completedCount > 0)
+    ? ` <span class="harto-pack-completed-badge">${completedCount}</span>`
+    : '';
   return `
     <div class="harto-deck-pack" data-pack="${escapeHtml(packName)}" role="button" tabindex="0" aria-label="Toggle completed cards">
       <div class="harto-deck-pack-content">
-        <h3 class="harto-deck-pack-title">${escapeHtml(packName)} · Completed</h3>
+        <h3 class="harto-deck-pack-title">${escapeHtml(packName)} · Completed${countBadge}</h3>
         <img class="harto-deck-pack-image" src="${imgSrc}" alt="" onerror="this.style.display='none'">
       </div>
       ${approvedOverlay}
@@ -421,7 +442,7 @@ function render(opts) {
     const incomplete = byPack.incomplete[pack] || [];
     const completed = byPack.completed[pack] || [];
     if (incomplete.length === 0 && completed.length === 0) return '';
-    let packHtml = renderPack(pack, completed.length > 0);
+    let packHtml = renderPack(pack, completed.length > 0, completed.length, !!packExpanded[pack]);
     if (incomplete.length > 0) packHtml = `<span class="harto-card-divider-wrap">${packHtml}</span>`;
     const incompleteHtml = incomplete.map((c, i) => renderCard(c, completions, false, i)).join('');
     const completedCards = completed.map((c, i) => renderCard(c, completions, true, incomplete.length + 1 + i));
@@ -451,7 +472,11 @@ function render(opts) {
   if (opts?.affectedPack && opts?.oldRects) {
     playFlipAnimation(deckEl, opts.affectedPack, opts.oldRects);
   } else {
-    playDealAnimation(deckEl);
+    const isPackToggle = window.__HARTO_HAS_RENDERED;
+    if (window.__HARTO_HAS_RENDERED === undefined) window.__HARTO_HAS_RENDERED = false;
+    window.__HARTO_HAS_RENDERED = true;
+    const runDeal = () => playDealAnimation(deckEl);
+    isPackToggle ? setTimeout(runDeal, 50) : runDeal();
   }
 
   deckEl.querySelectorAll('.harto-card-complete').forEach((btn) => {
@@ -664,6 +689,7 @@ function createShell() {
       <div id="harto-tasks" class="harto-tab-panel active">
         <div class="harto-tasks-toolbar">
           <div id="harto-packs" class="harto-packs"></div>
+          <button id="harto-reset-completed" class="harto-reset-completed harto-admin-only" title="Reset all completed in active filter" aria-label="Reset completed">↺</button>
           <button id="harto-view-toggle" class="harto-view-toggle" title="Toggle card/list view" aria-label="Toggle card/list view">⊞</button>
         </div>
         <div id="harto-deck" class="harto-deck"></div>
@@ -746,6 +772,28 @@ function initSetup() {
   }
 }
 
+function initResetCompleted() {
+  const btn = document.getElementById('harto-reset-completed');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    const filterPack = window.__HARTO_FILTER_PACK || 'All';
+    const cards = window.__HARTO_CARDS || [];
+    const completions = getCompletions();
+    const packsToReset = filterPack === 'All' ? PACKS.slice(1) : [filterPack];
+    let changed = false;
+    cards.forEach((c) => {
+      if (cardVisible(c) && packsToReset.includes(c.pack) && completions[c.id]) {
+        delete completions[c.id];
+        changed = true;
+      }
+    });
+    if (changed) {
+      setCompletions(completions);
+      render();
+    }
+  });
+}
+
 function initViewToggle() {
   const btn = document.getElementById('harto-view-toggle');
   const deckEl = document.getElementById('harto-deck');
@@ -784,6 +832,7 @@ if (document.readyState === 'loading') {
     initClock();
     initTabs();
     initViewToggle();
+    initResetCompleted();
     init();
   });
 } else {
@@ -793,5 +842,6 @@ if (document.readyState === 'loading') {
   initClock();
   initTabs();
   initViewToggle();
+  initResetCompleted();
   init();
 }

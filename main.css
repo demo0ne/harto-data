@@ -1,5 +1,5 @@
 /* Harto - Card-based To-Do for Heartopia */
-/* Version: 0.6.7 */
+/* Version: 0.7.3 */
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
 
@@ -45,6 +45,7 @@
 
 [data-theme="dark"] .harto-tab-badge,
 [data-theme="dark"] .harto-pack-badge,
+[data-theme="dark"] .harto-pack-completed-badge,
 [data-theme="dark"] .harto-card-step.checked {
   background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
   color: #fff !important;
@@ -146,6 +147,7 @@
 
 [data-setup="TW"] .harto-tab-badge,
 [data-setup="TW"] .harto-pack-badge,
+[data-setup="TW"] .harto-pack-completed-badge,
 [data-setup="TW"] .harto-card-step.checked {
   background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
   color: #fff !important;
@@ -455,6 +457,31 @@ html:not([data-theme="dark"]) .harto-topbar {
   padding: 0.5rem 0;
 }
 
+.harto-reset-completed {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  transition: all 0.2s ease;
+}
+
+.harto-reset-completed:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
 .harto-view-toggle {
   flex-shrink: 0;
   width: 2rem;
@@ -550,6 +577,27 @@ html:not([data-theme="dark"]) .harto-topbar {
   gap: 1.25rem;
 }
 
+/* List view - override card view */
+.harto-deck-view-list .harto-card-right {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.harto-deck-view-list .harto-card-left .harto-card-complete-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.harto-deck-view-list .harto-card-left .harto-card-complete {
+  opacity: 1;
+}
+
+.harto-deck-view-list .harto-card-complete-inline {
+  display: none;
+}
+
 /* List view */
 .harto-deck-view-list .harto-deck-cards {
   display: flex;
@@ -566,27 +614,150 @@ html:not([data-theme="dark"]) .harto-topbar {
 }
 
 .harto-deck-view-list .harto-card-content {
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: 4rem 1fr;
+  grid-template-rows: auto auto 1fr;
   flex: 1;
   min-width: 0;
 }
 
-.harto-deck-view-list .harto-card-title-row {
-  flex: 1;
-  order: 0;
+.harto-card-steps-row {
+  display: none;
 }
 
-.harto-deck-view-list .harto-card-image {
-  width: 4rem;
-  min-width: 4rem;
-  height: 4rem;
-  flex: 0 0 4rem;
+.harto-deck-view-list .harto-card-left {
+  grid-column: 1;
+  grid-row: 1 / -1;
+  position: relative;
+  overflow: hidden;
+  order: unset;
+}
+
+.harto-deck-view-list .harto-card-left .harto-card-complete-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.harto-deck-view-list .harto-card-image-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  transition: transform 0.25s ease;
+}
+
+.harto-deck-view-list .harto-card:hover .harto-card-image-wrap {
+  transform: translateX(-100%);
+}
+
+.harto-deck-view-list .harto-card-image-wrap .harto-card-image {
+  width: 100%;
+  height: 100%;
+  min-height: 4rem;
   object-fit: cover;
 }
 
 .harto-deck-view-list .harto-card-body {
+  flex-direction: column;
+}
+
+.harto-deck-view-list .harto-card-steps-row {
+  display: flex;
+  grid-column: 2;
+  grid-row: 1;
+  justify-content: center;
+  padding: 0.35rem 0 0;
+}
+
+.harto-deck-view-list .harto-card-steps-row .harto-card-steps {
+  margin: 0;
+}
+
+.harto-deck-view-list .harto-card-body .harto-card-steps {
   display: none;
 }
+
+.harto-deck-view-list .harto-card-steps .harto-card-step {
+  width: 0.85rem;
+  height: 0.85rem;
+  font-size: 0.45rem;
+  border-width: 1.5px;
+}
+
+.harto-deck-view-list .harto-card-title-row {
+  grid-column: 2;
+  grid-row: 2;
+  padding: 0.35rem 0.75rem 0.15rem;
+  align-items: center;
+  padding: 0.5rem 0.75rem 0.25rem;
+  order: unset;
+}
+
+.harto-deck-view-list .harto-card-title {
+  font-size: 1.1rem;
+}
+
+.harto-deck-view-list .harto-card-body {
+  grid-column: 2;
+  grid-row: 3;
+  order: unset;
+}
+
+/* Card view: hide meta badges */
+.harto-card-meta {
+  display: none;
+}
+
+/* List view: show body with description, meta, steps - align with title */
+.harto-deck-view-list .harto-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0 0.75rem 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.harto-deck-view-list .harto-card-description {
+  font-size: 0.7rem;
+  max-height: none;
+  opacity: 1;
+  color: var(--text-muted);
+  -webkit-line-clamp: 2;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.harto-deck-view-list .harto-card:hover .harto-card-description {
+  max-height: none;
+}
+
+.harto-deck-view-list .harto-card-meta {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.harto-card-meta-badge {
+  font-size: 0.6rem;
+  font-weight: 600;
+  padding: 0.15rem 0.4rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  text-transform: capitalize;
+}
+
+.harto-card-meta-label {
+  opacity: 0.85;
+  font-weight: 500;
+  margin-right: 0.15em;
+}
+
 
 .harto-deck-view-list .harto-card:hover {
   transform: none;
@@ -619,9 +790,6 @@ html:not([data-theme="dark"]) .harto-topbar {
   order: -1;
 }
 
-.harto-deck-view-list .harto-card .harto-card-image {
-  order: -1;
-}
 
 .harto-deck-pack {
   width: var(--card-width);
@@ -691,6 +859,29 @@ html:not([data-theme="dark"]) .harto-topbar {
   opacity: 1;
 }
 
+.harto-deck-section:has(.harto-deck-completed-visible) .harto-pack-completed-badge {
+  display: none !important;
+}
+
+.harto-pack-completed-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.4rem;
+  margin-left: 0.35rem;
+  vertical-align: middle;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-purple) 100%);
+  color: #fff !important;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
 .harto-card-divider-wrap {
   position: relative;
   overflow: visible;
@@ -704,7 +895,9 @@ html:not([data-theme="dark"]) .harto-topbar {
   bottom: 0;
   width: 2px;
   margin-left: -1px;
-  background: var(--border);
+  background: var(--accent);
+  opacity: 0.4;
+  box-shadow: 0 0 12px var(--accent-glow);
   z-index: 1;
 }
 
@@ -728,6 +921,37 @@ html:not([data-theme="dark"]) .harto-topbar {
   display: flex;
   flex-direction: column;
   min-height: 0;
+}
+
+/* Card view: left shows image only, right flows normally */
+.harto-card-left .harto-card-complete-wrap {
+  display: none;
+}
+
+.harto-card-left .harto-card-image-wrap {
+  display: block;
+}
+
+.harto-card-right {
+  display: contents;
+}
+
+.harto-card-complete-inline {
+  display: flex;
+}
+
+.harto-card-left {
+  order: 2;
+  flex: 1;
+  min-height: 0;
+}
+
+.harto-card-right .harto-card-title-row {
+  order: 1;
+}
+
+.harto-card-right .harto-card-body {
+  order: 3;
 }
 
 .harto-card.harto-card-dealing {
@@ -814,6 +1038,18 @@ html:not([data-theme="dark"]) .harto-topbar {
   background: var(--border);
 }
 
+.harto-card-image-wrap {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.harto-card-image-wrap .harto-card-image {
+  width: 100%;
+  height: 100%;
+  min-height: 8rem;
+}
+
 .harto-card-body {
   padding: 0.5rem 0.75rem;
   flex-shrink: 0;
@@ -831,6 +1067,8 @@ html:not([data-theme="dark"]) .harto-topbar {
   margin: 0;
   line-height: 1.4;
   transition: max-height 0.2s ease, opacity 0.2s ease;
+  position: relative;
+  z-index: 1;
 }
 
 .harto-card:hover .harto-card-description {
@@ -845,7 +1083,7 @@ html:not([data-theme="dark"]) .harto-topbar {
   border-radius: 50%;
   background: transparent;
   color: var(--accent);
-  border: 2px solid var(--accent);
+  border: 2px dashed var(--accent);
   cursor: pointer;
   font-size: 0.9rem;
   display: flex;
@@ -891,17 +1129,19 @@ html:not([data-theme="dark"]) .harto-topbar {
   justify-content: center;
   flex-wrap: wrap;
   margin-top: 0.5rem;
+  position: relative;
+  z-index: 2;
 }
 
 .harto-card-step {
-  width: 1.1rem;
-  height: 1.1rem;
+  width: 0.9rem;
+  height: 0.9rem;
   padding: 0;
   border-radius: 50%;
-  border: 1.5px solid var(--accent);
+  border: 1.5px dashed var(--accent);
   background: transparent;
   color: var(--accent);
-  font-size: 0.55rem;
+  font-size: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
