@@ -1,11 +1,21 @@
 /* Harto - Card-based To-Do for Heartopia */
-/* Version: 0.1.1 */
+/* Version: 0.2.0 */
 
 :root {
-  --card-width: 160px;
+  --card-width: 180px;
   --card-aspect: 2.5 / 3.5;
-  --card-radius: 8px;
-  --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --card-radius: 12px;
+  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --card-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --accent: #5a9c3a;
+  --accent-hover: #4a8530;
+  --accent-soft: rgba(90, 156, 58, 0.12);
+  --bg: #f8f9fa;
+  --surface: #ffffff;
+  --text: #2d3748;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+  --completed-bg: #f1f5f9;
 }
 
 * {
@@ -14,14 +24,19 @@
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, sans-serif;
-  background: #f5f0e8;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #f0f4e8 0%, #f8faf5 50%, #f5f7f2 100%);
+  min-height: 100vh;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
 }
 
 /* App shell */
 .harto-app {
   min-height: 100vh;
-  padding: 1rem;
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 /* Packs area */
@@ -30,155 +45,240 @@ body {
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
+  padding: 0.75rem 0;
 }
 
 .harto-pack {
   padding: 0.5rem 1rem;
-  background: #fff;
-  border-radius: var(--card-radius);
+  background: var(--surface);
+  border-radius: 999px;
   cursor: pointer;
   box-shadow: var(--card-shadow);
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
 }
 
 .harto-pack:hover {
-  background: #f8f4ed;
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.harto-pack.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
 }
 
 /* Deck area */
 .harto-deck {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
 .harto-deck-section {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--card-width), 1fr));
-  gap: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .harto-deck-section-title {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #555;
-  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 0.75rem;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.harto-deck-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
 }
 
 .harto-deck-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--card-width), 1fr));
-  gap: 1rem;
+  gap: 1.25rem;
+}
+
+.harto-deck-completed {
+  margin-top: 1.5rem;
+}
+
+.harto-deck-completed .harto-deck-section-title {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.harto-deck-completed .harto-deck-cards {
+  margin-top: 0.5rem;
+}
+
+.harto-deck-completed .harto-card {
+  opacity: 0.9;
 }
 
 /* Card */
 .harto-card {
   width: var(--card-width);
   aspect-ratio: var(--card-aspect);
-  background: #fff;
+  background: var(--surface);
   border-radius: var(--card-radius);
   box-shadow: var(--card-shadow);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.3s ease;
-  animation: harto-card-enter 0.3s ease forwards;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 4px solid var(--border);
+  position: relative;
+}
+
+.harto-card.harto-card-dealing {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .harto-card.harto-card-exit {
   animation: harto-card-exit 0.3s ease forwards;
+  animation-delay: 0s;
 }
 
-@keyframes harto-card-enter {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+.harto-card.harto-card-completed {
+  background: var(--completed-bg);
+}
+
+.harto-card.harto-card-completed .harto-card-title {
+  text-decoration: line-through;
+  color: var(--text-muted);
 }
 
 @keyframes harto-card-exit {
   to {
     opacity: 0;
-    transform: translateY(-20px) scale(0.9);
+    transform: translateY(-16px) scale(0.96);
   }
 }
 
 .harto-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-}
-
-.harto-card-image {
-  width: 100%;
-  height: 40%;
-  object-fit: cover;
-  background: #e8e0d4;
-}
-
-.harto-card-body {
-  padding: 0.5rem 0.75rem;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  transform: translateY(-3px);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .harto-card-title {
   font-weight: 600;
   font-size: 0.9rem;
-  margin: 0 0 0.25rem;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  line-height: 1.3;
+  order: -1;
+  flex-shrink: 0;
+}
+
+.harto-card-image {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  object-fit: cover;
+  object-position: center;
+  background: var(--border);
+}
+
+.harto-card-body {
+  padding: 0.5rem 0.75rem;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .harto-card-description {
   font-size: 0.75rem;
-  color: #666;
-  flex: 1;
+  color: var(--text-muted);
+  max-height: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
+  opacity: 0;
   margin: 0;
+  line-height: 1.4;
+  transition: max-height 0.2s ease, opacity 0.2s ease;
+}
+
+.harto-card:hover .harto-card-description {
+  max-height: 4.5em;
+  opacity: 1;
 }
 
 .harto-card-complete {
-  margin-top: 0.5rem;
-  padding: 0.35rem 0.75rem;
-  background: #7cb342;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--accent);
   color: #fff;
   border: none;
-  border-radius: 4px;
   cursor: pointer;
-  font-size: 0.8rem;
-  font-weight: 500;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+  align-self: center;
+  margin-top: auto;
+}
+
+.harto-card:hover .harto-card-complete {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .harto-card-complete:hover {
-  background: #689f38;
+  background: var(--accent-hover);
+}
+
+.harto-card-complete[data-action="uncomplete"] {
+  background: var(--text-muted);
+}
+
+.harto-card-complete[data-action="uncomplete"]:hover {
+  background: var(--text);
 }
 
 /* Tabs */
 .harto-tabs {
   display: flex;
-  gap: 0.25rem;
-  margin-bottom: 1rem;
+  gap: 0;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--border);
 }
 
 .harto-tab {
-  padding: 0.5rem 1rem;
+  padding: 0.65rem 1.25rem;
   background: transparent;
   border: none;
-  border-bottom: 2px solid transparent;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
   cursor: pointer;
   font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: color 0.2s;
 }
 
 .harto-tab:hover {
-  opacity: 0.8;
+  color: var(--text);
 }
 
 .harto-tab.active {
-  border-bottom-color: #7cb342;
+  color: var(--accent);
+  border-bottom-color: var(--accent);
   font-weight: 600;
 }
 
@@ -191,6 +291,7 @@ body {
 }
 
 .harto-placeholder {
-  color: #888;
-  padding: 2rem;
+  color: var(--text-muted);
+  padding: 3rem 2rem;
+  text-align: center;
 }

@@ -1,10 +1,10 @@
 /**
  * Harto - Card-based To-Do for Heartopia
- * Version: 0.1.1
+ * Version: 0.2.0
  */
 
 const CDN = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
-const VERSION = '0.1.1';
+const VERSION = '0.2.0';
 const STORAGE_COMPLETIONS = 'harto_completions';
 
 function getToday() {
@@ -76,21 +76,55 @@ function uncompleteCard(cardId) {
   render();
 }
 
-function renderCard(card, completions, inDeck) {
-  const done = isCompleted(card.id, completions);
+function renderCard(card, completions, done, index) {
   const imgSrc = card.image ? (card.image.startsWith('http') ? card.image : `${CDN}/${card.image}`) : '';
+  const btnIcon = done ? '↶' : '✓';
   return `
-    <div class="harto-card" data-id="${escapeHtml(card.id)}" data-pack="${escapeHtml(card.pack)}">
+    <div class="harto-card harto-card-dealing ${done ? 'harto-card-completed' : ''}" data-id="${escapeHtml(card.id)}" data-pack="${escapeHtml(card.pack)}" data-deal-index="${index >= 0 ? index : 0}">
+      <h3 class="harto-card-title">${escapeHtml(card.title)}</h3>
       <img class="harto-card-image" src="${imgSrc || ''}" alt="" onerror="this.style.display='none'">
       <div class="harto-card-body">
-        <h3 class="harto-card-title">${escapeHtml(card.title)}</h3>
         ${card.description ? `<p class="harto-card-description">${escapeHtml(card.description)}</p>` : ''}
-        <button class="harto-card-complete" data-action="${done ? 'uncomplete' : 'complete'}">
-          ${done ? 'Undo' : 'Complete'}
-        </button>
+        <button class="harto-card-complete" data-action="${done ? 'uncomplete' : 'complete'}" title="${done ? 'Undo' : 'Complete'}">${btnIcon}</button>
       </div>
     </div>
   `;
+}
+
+function playDealAnimation(deckEl) {
+  const cards = deckEl.querySelectorAll('.harto-card');
+  if (cards.length === 0) return;
+  const deckY = window.innerHeight - 120;
+  const deckX = window.innerWidth / 2;
+  const stagger = 80;
+  const duration = 450;
+  const easing = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
+
+  requestAnimationFrame(() => {
+    cards.forEach((card, i) => {
+      const idx = parseInt(card.dataset.dealIndex, 10);
+      const rect = card.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = deckX - cx;
+      const dy = deckY - cy;
+
+      card.animate(
+        [
+          { transform: `translate(${dx}px, ${dy}px) scale(0.85)`, opacity: 0 },
+          { transform: 'translate(0, 0) scale(1)', opacity: 1 }
+        ],
+        {
+          duration,
+          delay: idx * stagger,
+          easing,
+          fill: 'forwards'
+        }
+      ).finished.then(() => {
+        card.classList.remove('harto-card-dealing');
+      });
+    });
+  });
 }
 
 function escapeHtml(s) {
@@ -99,7 +133,7 @@ function escapeHtml(s) {
   return div.innerHTML;
 }
 
-const PACKS = ['Daily', 'Daily-NPC', 'Weekly', 'Seasonal', 'Others'];
+const PACKS = ['All', 'Daily', 'Daily-NPC', 'Weekly', 'Seasonal', 'Others'];
 
 function render() {
   const cards = window.__HARTO_CARDS || [];
@@ -107,32 +141,55 @@ function render() {
   const completions = getCompletions();
   const deckEl = document.getElementById('harto-deck');
   const packsEl = document.getElementById('harto-packs');
+  const filterPack = window.__HARTO_FILTER_PACK || 'All';
   if (!deckEl || !packsEl) return;
 
-  const incomplete = cards.filter((c) => !isCompleted(c.id, completions));
-  const byPack = {};
-  PACKS.forEach((p) => { byPack[p] = []; });
-  incomplete.forEach((c) => {
-    if (byPack[c.pack]) byPack[c.pack].push(c);
+  const byPack = { incomplete: {}, completed: {} };
+  PACKS.slice(1).forEach((p) => { byPack.incomplete[p] = []; byPack.completed[p] = []; });
+  cards.forEach((c) => {
+    if (!byPack.incomplete[c.pack]) return;
+    const done = isCompleted(c.id, completions);
+    (done ? byPack.completed : byPack.incomplete)[c.pack].push(c);
   });
 
   packsEl.innerHTML = PACKS.map(
     (pack) =>
-      `<button class="harto-pack" data-pack="${escapeHtml(pack)}">${escapeHtml(pack)}</button>`
+      `<button class="harto-pack ${filterPack === pack ? 'active' : ''}" data-pack="${escapeHtml(pack)}">${escapeHtml(pack)}</button>`
   ).join('');
 
-  deckEl.innerHTML = PACKS.map((pack) => {
-    const cards = byPack[pack] || [];
-    if (cards.length === 0) return '';
+  const packsToShow = filterPack === 'All' ? PACKS.slice(1) : [filterPack];
+  deckEl.innerHTML = packsToShow.map((pack) => {
+    const incomplete = byPack.incomplete[pack] || [];
+    const completed = byPack.completed[pack] || [];
+    if (incomplete.length === 0 && completed.length === 0) return '';
     return `
       <div class="harto-deck-section" data-pack="${escapeHtml(pack)}">
         <h4 class="harto-deck-section-title">${escapeHtml(pack)}</h4>
-        <div class="harto-deck-cards">
-          ${cards.map((c) => renderCard(c, completions, true)).join('')}
-        </div>
+        ${incomplete.length > 0 ? `
+          <div class="harto-deck-cards">
+            ${incomplete.map((c, i) => renderCard(c, completions, false, i)).join('')}
+          </div>
+        ` : ''}
+        ${completed.length > 0 ? `
+          <div class="harto-deck-completed">
+            <h4 class="harto-deck-section-title">Completed</h4>
+            <div class="harto-deck-cards">
+              ${completed.map((c, i) => renderCard(c, completions, true, incomplete.length + i)).join('')}
+            </div>
+          </div>
+        ` : ''}
       </div>
     `;
   }).filter(Boolean).join('');
+
+  packsEl.querySelectorAll('.harto-pack').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      window.__HARTO_FILTER_PACK = btn.dataset.pack;
+      render();
+    });
+  });
+
+  playDealAnimation(deckEl);
 
   deckEl.querySelectorAll('.harto-card-complete').forEach((btn) => {
     btn.addEventListener('click', (e) => {
