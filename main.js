@@ -221,9 +221,11 @@ function renderCard(card, completions, done, index) {
   const loc = trackerEntry?.location || '';
   const effectiveDate = trackerEntry?.effectiveDate || '';
   const isValid = loc ? isTrackerLocationValid(effectiveDate) : false;
-  const validityClass = isValid ? 'harto-card-location-valid' : 'harto-card-location-invalid';
-  const validityLabel = isValid ? 'Valid' : 'Expired';
-  const locationOverlay = loc ? `<span class="harto-card-location-overlay"><span class="harto-card-location-badge"><span class="harto-card-location-text">${escapeHtml(loc)}</span><span class="harto-card-location-validity ${validityClass}">${escapeHtml(validityLabel)}</span></span></span>` : '';
+  const isExpired = !isValid && loc;
+  const expiredImg = isExpired ? `<img class="harto-card-expired-overlay" src="${CDN}/assets/images/expired.png" alt="" aria-hidden="true">` : '';
+  const expiredClass = isExpired ? ' harto-card-location-expired' : '';
+  const imageWrapExpiredClass = isExpired ? ' harto-card-image-expired' : '';
+  const locationOverlay = loc ? `<span class="harto-card-location-overlay"><span class="harto-card-location-badge-wrap${expiredClass}"><span class="harto-card-location-badge">${escapeHtml(loc)}</span></span></span>` : '';
   const season = card.season || 'always';
   const weather = card.weather || 'any';
   const time = card.time || 'all';
@@ -237,12 +239,12 @@ function renderCard(card, completions, done, index) {
       <div class="harto-card-content">
         <div class="harto-card-left">
           <span class="harto-card-complete-wrap">${completeBtn}</span>
-          <div class="harto-card-image-wrap"><img class="harto-card-image" src="${imgSrc || ''}" alt="" onerror="this.style.display='none'">${locationOverlay}</div>
+          <div class="harto-card-image-wrap${imageWrapExpiredClass}"><img class="harto-card-image" src="${imgSrc || ''}" alt="" onerror="this.style.display='none'">${locationOverlay}${expiredImg}</div>
         </div>
         <div class="harto-card-right">
           ${isStepCard ? `<div class="harto-card-steps-row">${stepsHtml}</div>` : ''}
           <div class="harto-card-title-row">
-            <h3 class="harto-card-title">${escapeHtml(card.title)}</h3>
+            <h3 class="harto-card-title">${escapeHtml(card.title)}${loc ? `<span class="harto-card-location-title-badge${expiredClass}">${escapeHtml(loc)}</span>` : ''}</h3>
             <span class="harto-card-complete-wrap harto-card-complete-inline">${completeBtn}</span>
           </div>
           <div class="harto-card-body">
