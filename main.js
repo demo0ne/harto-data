@@ -1,10 +1,10 @@
 /**
  * Harto - Card-based To-Do for Heartopia
- * Version: 0.7.4
+ * Version: 0.7.5
  */
 
 const CDN = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
-const VERSION = '0.7.4';
+const VERSION = '0.7.5';
 const STORAGE_COMPLETIONS = 'harto_completions';
 const STORAGE_COMPLETIONS_TW = 'harto_completions_tw';
 const STORAGE_THEME = 'harto_theme';
@@ -52,6 +52,12 @@ function getToday() {
   const d = new Date(now);
   if (now.getHours() < hr) d.setDate(d.getDate() - 1);
   return formatDate(d);
+}
+
+function isTrackerLocationValid(effectiveDate) {
+  if (!effectiveDate || typeof effectiveDate !== 'string') return false;
+  const today = getToday();
+  return effectiveDate.trim() === today;
 }
 
 function getWeekStart() {
@@ -211,12 +217,13 @@ function renderCard(card, completions, done, index) {
   }
   const completeBtn = `<button class="harto-card-complete" data-action="${done ? 'uncomplete' : 'complete'}" title="${done ? 'Undo' : 'Complete'}">${done ? '✓' : ''}</button>`;
   const approvedOverlay = done ? `<div class="harto-card-approved" style="background-image: url('${approvedUrl}')"></div>` : '';
-  const loc = (card.id === 'roamingoak' && __trackerData?.roamingOak?.location)
-    ? __trackerData.roamingOak.location
-    : (card.id === 'flawless' && __trackerData?.flawlessFlourite?.location)
-      ? __trackerData.flawlessFlourite.location
-      : '';
-  const locationOverlay = loc ? `<span class="harto-card-location-overlay"><span class="harto-card-location-badge">${escapeHtml(loc)}</span></span>` : '';
+  const trackerEntry = card.id === 'roamingoak' ? __trackerData?.roamingOak : card.id === 'flawless' ? __trackerData?.flawlessFlourite : null;
+  const loc = trackerEntry?.location || '';
+  const effectiveDate = trackerEntry?.effectiveDate || '';
+  const isValid = loc ? isTrackerLocationValid(effectiveDate) : false;
+  const validityClass = isValid ? 'harto-card-location-valid' : 'harto-card-location-invalid';
+  const validityLabel = isValid ? 'Valid' : 'Expired';
+  const locationOverlay = loc ? `<span class="harto-card-location-overlay"><span class="harto-card-location-badge"><span class="harto-card-location-text">${escapeHtml(loc)}</span><span class="harto-card-location-validity ${validityClass}">${escapeHtml(validityLabel)}</span></span></span>` : '';
   const season = card.season || 'always';
   const weather = card.weather || 'any';
   const time = card.time || 'all';

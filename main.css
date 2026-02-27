@@ -1055,14 +1055,45 @@ html:not([data-theme="dark"]) .harto-topbar {
 }
 
 .harto-card-location-badge {
-  padding: 0.5em 0.85em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25em;
+  padding: 1em 1.65em;
   font-size: 1.25rem;
   font-weight: 700;
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-  background: rgba(0, 0, 0, 0.8);
+  color: var(--text);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  background: var(--border);
   border-radius: 0.5em;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.harto-card-location-text {
+  font-size: 1em;
+}
+
+.harto-card-location-validity {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.harto-card-location-valid {
+  color: #059669;
+}
+
+[data-theme="dark"] .harto-card-location-valid {
+  color: #34d399;
+}
+
+.harto-card-location-invalid {
+  color: #6b7280;
+}
+
+[data-theme="dark"] .harto-card-location-invalid {
+  color: #9ca3af;
 }
 
 .harto-card-image-wrap .harto-card-image {
