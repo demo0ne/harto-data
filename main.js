@@ -1,37 +1,72 @@
 /**
  * Harto - Card-based To-Do for Heartopia
- * Version: 0.3.0
+ * Version: 0.4.0
  */
 
 const CDN = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
-const VERSION = '0.3.0';
+const VERSION = '0.4.0';
 const STORAGE_COMPLETIONS = 'harto_completions';
+const STORAGE_COMPLETIONS_TW = 'harto_completions_tw';
 const STORAGE_THEME = 'harto_theme';
+const STORAGE_SETUP = 'harto_setup';
+// harto_admin: read-only from app; set manually in browser localStorage to 'true' for admin mode
+
+function isAdmin() {
+  return localStorage.getItem('harto_admin') === 'true';
+}
+
+function getSetup() {
+  const s = localStorage.getItem(STORAGE_SETUP) || 'SEA';
+  return s === 'TW' ? 'TW' : 'SEA';
+}
+
+function getStorageCompletions() {
+  return getSetup() === 'TW' ? STORAGE_COMPLETIONS_TW : STORAGE_COMPLETIONS;
+}
+
+function pad2(n) {
+  return String(n).padStart(2, '0');
+}
+
+function formatDate(d) {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+
+function getResetHour() {
+  return getSetup() === 'TW' ? 6 : 7;
+}
 
 function getToday() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const hr = getResetHour();
+  const now = new Date();
+  const d = new Date(now);
+  if (now.getHours() < hr) d.setDate(d.getDate() - 1);
+  return formatDate(d);
 }
 
 function getWeekStart() {
-  const d = new Date();
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  const monday = new Date(d);
-  monday.setDate(diff);
-  return `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
+  const hr = getResetHour();
+  const now = new Date();
+  const d = new Date(now);
+  const day = d.getDay(); // 0=Sun, 6=Sat
+  const hrs = d.getHours();
+  const daysToSat = day === 6
+    ? (hrs < hr ? 7 : 0)
+    : (day + 1); // Sun->1, Mon->2, ..., Fri->6
+  d.setDate(d.getDate() - daysToSat);
+  return formatDate(d);
 }
 
 function getCompletions() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_COMPLETIONS) || '{}');
+    return JSON.parse(localStorage.getItem(getStorageCompletions()) || '{}');
   } catch {
     return {};
   }
 }
 
 function setCompletions(obj) {
-  localStorage.setItem(STORAGE_COMPLETIONS, JSON.stringify(obj));
+  localStorage.setItem(getStorageCompletions(), JSON.stringify(obj));
 }
 
 function shouldReset(pack, dateKey) {
@@ -62,10 +97,16 @@ function isCompleted(cardId, completions) {
   return !shouldReset(card.pack, entry.date);
 }
 
+function getDateKeyForPack(pack) {
+  if (pack === 'Weekly') return getWeekStart();
+  return getToday();
+}
+
 function completeCard(cardId, opts) {
   const completions = getCompletions();
-  const today = getToday();
-  completions[cardId] = { date: today, timestamp: Date.now() };
+  const card = window.__HARTO_CARDS?.find((c) => c.id === cardId);
+  const dateKey = card ? getDateKeyForPack(card.pack) : getToday();
+  completions[cardId] = { date: dateKey, timestamp: Date.now() };
   setCompletions(completions);
   render(opts);
 }
@@ -282,20 +323,183 @@ async function init() {
   console.log(`Harto v${VERSION}`);
 }
 
-function initTheme() {
-  const stored = localStorage.getItem(STORAGE_THEME);
+function getEffectiveTheme(stored) {
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const dark = stored === 'dark' || (!stored && prefersDark);
-  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  if (stored === 'dark') return 'dark';
+  if (stored === 'light') return 'light';
+  return prefersDark ? 'dark' : 'light';
+}
+
+function getThemeIcon(stored) {
+  if (stored === 'dark') return '☀';
+  if (stored === 'light') return '🌙';
+  return '⚙';
+}
+
+function applyTheme(stored) {
+  const effective = getEffectiveTheme(stored);
+  document.documentElement.setAttribute('data-theme', effective);
   const btn = document.getElementById('harto-theme-toggle');
   if (btn) {
-    btn.textContent = dark ? '☀' : '🌙';
+    btn.textContent = getThemeIcon(stored);
+    btn.title = stored === 'dark' ? 'Dark (click for light)' : stored === 'light' ? 'Light (click for system)' : 'System (click for dark)';
+    btn.setAttribute('aria-label', btn.title);
+  }
+}
+
+function initTheme() {
+  const stored = localStorage.getItem(STORAGE_THEME) || 'system';
+  applyTheme(stored);
+
+  const btn = document.getElementById('harto-theme-toggle');
+  if (btn) {
     btn.addEventListener('click', () => {
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      const next = isDark ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
+      const s = localStorage.getItem(STORAGE_THEME) || 'system';
+      const next = s === 'dark' ? 'light' : s === 'light' ? 'system' : 'dark';
       localStorage.setItem(STORAGE_THEME, next);
-      btn.textContent = next === 'dark' ? '☀' : '🌙';
+      applyTheme(next);
+    });
+  }
+
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    const s = localStorage.getItem(STORAGE_THEME) || 'system';
+    if (s === 'system') applyTheme(s);
+  });
+}
+
+function getTimeSlot() {
+  const h = new Date().getHours();
+  if (getSetup() === 'TW') {
+    // TW: 6am-12pm dawn, 12pm-6pm day, 6pm-12am dusk, 12am-6am night
+    if (h >= 6 && h < 12) return 'dawn';
+    if (h >= 12 && h < 18) return 'day';
+    if (h >= 18) return 'dusk';
+    return 'night';
+  }
+  // SEA: 7am-1pm dawn, 1pm-7pm day, 7pm-1am dusk, 1am-7am night
+  if (h >= 7 && h < 13) return 'dawn';
+  if (h >= 13 && h < 19) return 'day';
+  if (h >= 19 || h < 1) return 'dusk';
+  return 'night';
+}
+
+const WEATHER_LABELS = {
+  sunny: 'Sunny Day',
+  meteor: 'Meteor Shower',
+  rain: 'Rainy',
+  rainbow: 'Rainbow',
+  aurora: 'Aurora'
+};
+
+function applySetup() {
+  document.documentElement.setAttribute('data-setup', getSetup());
+}
+
+function createShell() {
+  const CDN_BASE = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
+  const iconSrc = `${CDN_BASE}/assets/images/hatopia.png`;
+  const setup = getSetup();
+  document.body.innerHTML = `
+    <header class="harto-topbar">
+      <a href="#" class="harto-topbar-brand">
+        <img class="harto-topbar-icon" src="${iconSrc}" alt="">
+        <span class="harto-topbar-title"><span class="harto-topbar-title-a">Harto</span>.<span class="harto-topbar-title-b">dashboard</span></span>
+        <span class="harto-setup-label harto-admin-only" id="harto-setup-label">${setup}</span>
+      </a>
+      <div class="harto-topbar-end">
+        <button id="harto-setup-toggle" class="harto-setup-toggle harto-admin-only" title="Switch setup (SEA / TW)" aria-label="Switch setup">SEA / TW</button>
+        <button id="harto-theme-toggle" class="harto-theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">🌙</button>
+      </div>
+    </header>
+    <div class="harto-app">
+      <div class="harto-clock-block">
+        <div class="harto-clock">
+          <div class="harto-clock-row"><span id="harto-time"></span></div>
+          <div class="harto-clock-date" id="harto-date"></div>
+          <div class="harto-clock-weather" id="harto-weather-label"></div>
+        </div>
+        <img id="harto-weather-icon" class="harto-weather-icon" src="" alt="">
+      </div>
+      <header class="harto-header">
+        <nav class="harto-tabs">
+          <button class="harto-tab active" data-tab="tasks">Tasks</button>
+          <button class="harto-tab" data-tab="guides">Guides</button>
+        </nav>
+      </header>
+      <div id="harto-tasks" class="harto-tab-panel active">
+        <div id="harto-packs" class="harto-packs"></div>
+        <div id="harto-deck" class="harto-deck"></div>
+      </div>
+      <div id="harto-guides" class="harto-tab-panel">
+        <p class="harto-placeholder">Guides coming soon.</p>
+      </div>
+    </div>
+  `;
+}
+
+async function initClock() {
+  let weatherBySlot = { dawn: 'sunny', day: 'sunny', dusk: 'sunny', night: 'sunny' };
+  try {
+    const res = await fetch(`${CDN}/info/weather.json`);
+    const data = await res.json();
+    if (data && typeof data === 'object') {
+      weatherBySlot = { ...weatherBySlot, ...data };
+    }
+  } catch (_) {}
+
+  function updateClock() {
+    const now = new Date();
+    const hrs = now.getHours();
+    const mins = now.getMinutes();
+    const ampm = hrs >= 12 ? 'PM' : 'AM';
+    const h12 = hrs % 12 || 12;
+    const timeStr = `${String(h12).padStart(2, '0')}:${String(mins).padStart(2, '0')} ${ampm}`;
+
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const dateStr = `${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
+
+    const slot = getTimeSlot();
+    const weather = (weatherBySlot[slot] || 'sunny').toLowerCase().replace(/\s+/g, '-');
+    const validWeather = ['sunny', 'meteor', 'rain', 'rainbow', 'aurora'].includes(weather) ? weather : 'sunny';
+    const label = WEATHER_LABELS[validWeather] || 'Sunny Day';
+    const imgName = validWeather === 'sunny' ? slot : validWeather;
+    const imgSrc = `${CDN}/assets/images/weather/${imgName}.png`;
+
+    const $time = document.getElementById('harto-time');
+    const $date = document.getElementById('harto-date');
+    const $label = document.getElementById('harto-weather-label');
+    const $img = document.getElementById('harto-weather-icon');
+    if ($time) $time.textContent = timeStr;
+    if ($date) $date.textContent = dateStr;
+    if ($label) $label.textContent = label;
+    if ($img) {
+      $img.src = imgSrc;
+      $img.alt = label;
+    }
+  }
+
+  updateClock();
+  setInterval(updateClock, 60000);
+  window.addEventListener('harto:setupChange', updateClock);
+}
+
+function initSetup() {
+  applySetup();
+  const admin = isAdmin();
+  document.querySelectorAll('.harto-admin-only').forEach((el) => {
+    el.style.display = admin ? (el.classList.contains('harto-setup-toggle') ? 'flex' : 'inline') : 'none';
+  });
+  const $label = document.getElementById('harto-setup-label');
+  const $toggle = document.getElementById('harto-setup-toggle');
+  if ($label) $label.textContent = getSetup();
+  if ($toggle && admin) {
+    $toggle.addEventListener('click', () => {
+      const next = getSetup() === 'SEA' ? 'TW' : 'SEA';
+      localStorage.setItem(STORAGE_SETUP, next);
+      applySetup();
+      if ($label) $label.textContent = next;
+      window.dispatchEvent(new CustomEvent('harto:setupChange'));
+      render();
     });
   }
 }
@@ -315,12 +519,18 @@ function initTabs() {
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
+    createShell();
+    initSetup();
     initTheme();
+    initClock();
     initTabs();
     init();
   });
 } else {
+  createShell();
+  initSetup();
   initTheme();
+  initClock();
   initTabs();
   init();
 }

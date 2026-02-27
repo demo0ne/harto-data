@@ -1,5 +1,5 @@
 /* Harto - Card-based To-Do for Heartopia */
-/* Version: 0.3.0 */
+/* Version: 0.4.0 */
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
 
@@ -45,7 +45,7 @@
 
 [data-theme="dark"] .harto-tab-badge,
 [data-theme="dark"] .harto-pack-badge {
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-purple) 100%);
+  background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
   color: #fff !important;
 }
 
@@ -62,7 +62,7 @@
 }
 
 [data-theme="dark"] .harto-pack.active {
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-purple) 100%);
+  background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
   color: #fff !important;
   border-color: transparent;
 }
@@ -77,6 +77,133 @@
 
 [data-theme="dark"] .harto-card-image {
   background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(99, 102, 241, 0.12) 50%, rgba(167, 139, 250, 0.08) 100%);
+}
+
+/* TW setup: full pink theme */
+[data-setup="TW"] {
+  --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06);
+  --card-shadow-hover: 0 10px 22px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(219, 39, 119, 0.2);
+  --accent: #db2777;
+  --accent-hover: #be185d;
+  --accent-soft: rgba(219, 39, 119, 0.18);
+  --accent-glow: rgba(219, 39, 119, 0.3);
+  --accent-purple: #ec4899;
+  --bg: #fef2f8;
+  --surface: #ffffff;
+  --text: #4c1d4a;
+  --text-muted: #831843;
+  --border: #fbcfe8;
+  --completed-bg: #fdf2f8;
+  --body-bg: radial-gradient(circle at top left, #fbcfe8, #fef2f8 55%);
+}
+
+[data-setup="TW"] .harto-topbar-title-a {
+  color: #9d174d;
+}
+
+[data-setup="TW"] .harto-topbar-title-b {
+  color: var(--accent);
+}
+
+[data-setup="TW"][data-theme="dark"] {
+  --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.03);
+  --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(236, 72, 153, 0.25);
+  --accent: #ec4899;
+  --accent-hover: #db2777;
+  --accent-soft: rgba(236, 72, 153, 0.22);
+  --accent-glow: rgba(236, 72, 153, 0.35);
+  --accent-purple: #f472b6;
+  --bg: #1f1519;
+  --surface: #2a1e24;
+  --text: #fce7f3;
+  --text-muted: #f9a8d4;
+  --border: #4c3742;
+  --completed-bg: #251b20;
+  --card-bg: radial-gradient(145% 120% at 0% 0%, rgba(219, 39, 119, 0.15), rgba(236, 72, 153, 0.06) 50%, #2a1e24);
+  --card-completed-bg: radial-gradient(120% 100% at 100% 100%, rgba(219, 39, 119, 0.08), #251b20);
+  --body-bg: radial-gradient(circle at top left, #2e2430 0%, #221a24 35%, #1f1519 65%),
+    radial-gradient(circle at 90% 90%, rgba(236, 72, 153, 0.08) 0%, transparent 50%);
+}
+
+[data-setup="TW"][data-theme="dark"] .harto-topbar-title-a {
+  color: #f9a8d4;
+}
+
+[data-setup="TW"][data-theme="dark"] .harto-topbar-title-b {
+  color: var(--accent-purple);
+}
+
+[data-setup="TW"] .harto-topbar {
+  background: linear-gradient(90deg, #fdf2f8 0%, #fce7f3 50%, #fef2f8 100%);
+}
+
+[data-setup="TW"][data-theme="dark"] .harto-topbar {
+  background: linear-gradient(90deg, rgba(219, 39, 119, 0.15) 0%, rgba(236, 72, 153, 0.08) 100%);
+  border-bottom-color: var(--border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+[data-setup="TW"] .harto-tab-badge,
+[data-setup="TW"] .harto-pack-badge {
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+  color: #fff !important;
+}
+
+[data-setup="TW"] .harto-pack {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+[data-setup="TW"] .harto-pack:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+[data-setup="TW"] .harto-pack.active {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-purple) 100%);
+  color: #fff !important;
+  border-color: transparent;
+}
+
+[data-setup="TW"][data-theme="dark"] .harto-pack {
+  background: #2a1e24;
+  color: #fce7f3;
+  border-color: var(--border);
+}
+
+[data-setup="TW"][data-theme="dark"] .harto-pack:hover {
+  background: var(--accent-soft);
+  border-color: rgba(236, 72, 153, 0.4);
+}
+
+[data-setup="TW"][data-theme="dark"] .harto-pack.active {
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+}
+
+[data-setup="TW"] .harto-card {
+  background: var(--surface);
+}
+
+[data-setup="TW"] .harto-card.harto-card-completed {
+  background: var(--completed-bg);
+}
+
+[data-setup="TW"] .harto-card-image {
+  background: linear-gradient(135deg, rgba(219, 39, 119, 0.2) 0%, rgba(236, 72, 153, 0.12) 50%, rgba(244, 114, 182, 0.08) 100%);
+}
+
+[data-setup="TW"][data-theme="dark"] .harto-card {
+  background: var(--card-bg);
+}
+
+[data-setup="TW"][data-theme="dark"] .harto-card.harto-card-completed {
+  background: var(--card-completed-bg);
+}
+
+[data-setup="TW"][data-theme="dark"] .harto-card-image {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(219, 39, 119, 0.12) 50%, rgba(244, 114, 182, 0.08) 100%);
 }
 
 * {
@@ -94,6 +221,73 @@ body {
   transition: background 0.3s ease, color 0.2s ease;
 }
 
+/* Top bar */
+.harto-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.5rem 1.25rem;
+  background: var(--surface);
+  border-bottom: 0.5px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.harto-topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.harto-topbar-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.harto-topbar-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.harto-topbar-title-a {
+  color: var(--accent);
+}
+
+.harto-topbar-title-b {
+  color: #db2777;
+}
+
+.harto-topbar {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+}
+
+html:not([data-theme="dark"]) .harto-topbar {
+  background: linear-gradient(90deg, #fdf2f8 0%, #fce7f3 50%, #f5f3ff 100%);
+}
+
+[data-theme="dark"] .harto-topbar-title-b {
+  color: var(--accent-purple);
+}
+
+[data-theme="dark"] .harto-topbar {
+  background: linear-gradient(90deg, rgba(124, 92, 255, 0.15) 0%, rgba(99, 102, 241, 0.08) 100%);
+  backdrop-filter: blur(8px);
+  border-bottom-color: var(--border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .harto-topbar-title-b {
+  color: var(--accent-purple);
+}
+
 /* Header */
 .harto-header {
   display: flex;
@@ -101,6 +295,104 @@ body {
   justify-content: space-between;
   margin-bottom: 1.5rem;
   gap: 1rem;
+}
+
+.harto-admin-only {
+  display: none;
+}
+
+.harto-setup-label {
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-purple) 100%);
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  margin-left: 0.5rem;
+  letter-spacing: 0.04em;
+}
+
+.harto-setup-toggle {
+  flex-shrink: 0;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  padding: 0 0.5rem;
+  border: none;
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.65rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--card-shadow);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.harto-setup-toggle:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+  transform: scale(1.05);
+}
+
+.harto-topbar-end {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.harto-clock-block {
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.1rem;
+}
+
+.harto-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.harto-clock-row {
+  display: flex;
+  align-items: center;
+}
+
+.harto-clock-row #harto-time {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.harto-weather-icon {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.harto-clock-date {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.harto-clock-weather {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-transform: capitalize;
+}
+
+.harto-topbar .harto-theme-toggle {
+  width: 2rem;
+  height: 2rem;
+  font-size: 1rem;
 }
 
 .harto-theme-toggle {
@@ -129,7 +421,7 @@ body {
 
 /* App shell */
 .harto-app {
-  min-height: 100vh;
+  position: relative;
   padding: 1.5rem;
   max-width: 1200px;
   margin: 0 auto;

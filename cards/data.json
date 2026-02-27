@@ -67,7 +67,7 @@
       "id": "bob",
       "pack": "Daily-NPC",
       "title": "Bob (Furniture)",
-      "description": "",
+      "description": "Bob the builder. Buy furniture and get disappointed.",
       "image": "assets/images/placeholder.png"
     },
     {
@@ -110,7 +110,7 @@
       "pack": "Weekly",
       "title": "Pink Bubbles",
       "description": "",
-      "image": "assets/images/placeholder.png"
+      "image": "assets/images/Weekly/pink_bubbles.png"
     },
     {
       "id": "doris-meteor",
