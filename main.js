@@ -1,10 +1,10 @@
 /**
  * Harto - Card-based To-Do for Heartopia
- * Version: 0.2.0
+ * Version: 0.3.0
  */
 
 const CDN = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
-const VERSION = '0.2.0';
+const VERSION = '0.3.0';
 const STORAGE_COMPLETIONS = 'harto_completions';
 const STORAGE_THEME = 'harto_theme';
 
@@ -62,19 +62,19 @@ function isCompleted(cardId, completions) {
   return !shouldReset(card.pack, entry.date);
 }
 
-function completeCard(cardId) {
+function completeCard(cardId, opts) {
   const completions = getCompletions();
   const today = getToday();
   completions[cardId] = { date: today, timestamp: Date.now() };
   setCompletions(completions);
-  render();
+  render(opts);
 }
 
-function uncompleteCard(cardId) {
+function uncompleteCard(cardId, opts) {
   const completions = getCompletions();
   delete completions[cardId];
   setCompletions(completions);
-  render();
+  render(opts);
 }
 
 function renderCard(card, completions, done, index) {
@@ -138,6 +138,45 @@ function playDealAnimation(deckEl) {
   });
 }
 
+function playFlipAnimation(deckEl, affectedPack, oldRects) {
+  const section = deckEl.querySelector(`.harto-deck-section[data-pack="${affectedPack}"]`);
+  if (!section) return;
+
+  // Cards outside the affected pack stay hidden by harto-card-dealing; reveal them
+  deckEl.querySelectorAll('.harto-card').forEach((card) => {
+    if (!section.contains(card)) card.classList.remove('harto-card-dealing');
+  });
+
+  const cards = section.querySelectorAll('.harto-card');
+  const duration = 280;
+
+  requestAnimationFrame(() => {
+    cards.forEach((card) => {
+      const id = card.dataset.id;
+      const newRect = card.getBoundingClientRect();
+      const oldRect = oldRects.get(id);
+
+      card.classList.remove('harto-card-dealing');
+      if (oldRect) {
+        const dx = oldRect.left - newRect.left;
+        const dy = oldRect.top - newRect.top;
+        card.style.transform = `translate(${dx}px, ${dy}px)`;
+      }
+      card.style.transition = 'none';
+    });
+    document.body.offsetHeight;
+    requestAnimationFrame(() => {
+      cards.forEach((card) => {
+        card.style.transition = `transform ${duration}ms cubic-bezier(0.22, 1, 0.36, 1)`;
+        card.style.transform = '';
+      });
+      setTimeout(() => {
+        cards.forEach((c) => { c.style.transition = ''; });
+      }, duration);
+    });
+  });
+}
+
 function escapeHtml(s) {
   const div = document.createElement('div');
   div.textContent = s || '';
@@ -146,7 +185,7 @@ function escapeHtml(s) {
 
 const PACKS = ['All', 'Daily', 'Daily-NPC', 'Weekly', 'Seasonal', 'Others'];
 
-function render() {
+function render(opts) {
   const cards = window.__HARTO_CARDS || [];
   applyResets(getCompletions());
   const completions = getCompletions();
@@ -181,22 +220,17 @@ function render() {
     const incomplete = byPack.incomplete[pack] || [];
     const completed = byPack.completed[pack] || [];
     if (incomplete.length === 0 && completed.length === 0) return '';
+    const incompleteHtml = incomplete.map((c, i) => renderCard(c, completions, false, i)).join('');
+    const completedCards = completed.map((c, i) => renderCard(c, completions, true, incomplete.length + i));
+    const completedHtml = incomplete.length > 0 && completedCards.length > 0
+      ? `<span class="harto-card-divider-wrap">${completedCards[0]}</span>` + completedCards.slice(1).join('')
+      : completedCards.join('');
     return `
       <div class="harto-deck-section" data-pack="${escapeHtml(pack)}">
         <h4 class="harto-deck-section-title">${escapeHtml(pack)}</h4>
-        ${incomplete.length > 0 ? `
-          <div class="harto-deck-cards">
-            ${incomplete.map((c, i) => renderCard(c, completions, false, i)).join('')}
-          </div>
-        ` : ''}
-        ${completed.length > 0 ? `
-          <div class="harto-deck-completed">
-            <h4 class="harto-deck-section-title">Completed</h4>
-            <div class="harto-deck-cards">
-              ${completed.map((c, i) => renderCard(c, completions, true, incomplete.length + i)).join('')}
-            </div>
-          </div>
-        ` : ''}
+        <div class="harto-deck-cards">
+          ${incompleteHtml}${completedHtml}
+        </div>
       </div>
     `;
   }).filter(Boolean).join('');
@@ -208,21 +242,32 @@ function render() {
     });
   });
 
-  playDealAnimation(deckEl);
+  if (opts?.affectedPack && opts?.oldRects) {
+    playFlipAnimation(deckEl, opts.affectedPack, opts.oldRects);
+  } else {
+    playDealAnimation(deckEl);
+  }
 
   deckEl.querySelectorAll('.harto-card-complete').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       const cardEl = e.target.closest('.harto-card');
       if (!cardEl) return;
       const id = cardEl.dataset.id;
+      const pack = cardEl.dataset.pack;
       const action = e.target.dataset.action;
+
+      const section = deckEl.querySelector(`[data-pack="${pack}"]`);
+      const oldRects = new Map();
+      if (section) {
+        section.querySelectorAll('.harto-card').forEach((c) => {
+          oldRects.set(c.dataset.id, c.getBoundingClientRect());
+        });
+      }
+
       if (action === 'complete') {
-        cardEl.classList.add('harto-card-exit');
-        cardEl.addEventListener('animationend', () => {
-          completeCard(id);
-        }, { once: true });
+        completeCard(id, { affectedPack: pack, oldRects });
       } else {
-        uncompleteCard(id);
+        uncompleteCard(id, { affectedPack: pack, oldRects });
       }
     });
   });
