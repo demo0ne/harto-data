@@ -282,6 +282,27 @@ body {
   font-weight: 600;
 }
 
+.harto-tab-badge,
+.harto-pack-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.4rem;
+  margin-left: 0.35rem;
+  background: var(--accent);
+  color: #fff !important;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  border-radius: 999px;
+}
+
+.harto-pack-badge {
+  margin-left: 0.4rem;
+}
+
 .harto-tab-panel {
   display: none;
 }

@@ -96,32 +96,37 @@ function playDealAnimation(deckEl) {
   if (cards.length === 0) return;
   const deckY = window.innerHeight - 120;
   const deckX = window.innerWidth / 2;
-  const stagger = 80;
-  const duration = 450;
-  const easing = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
+  const stagger = 45;
+  const duration = 320;
 
   requestAnimationFrame(() => {
-    cards.forEach((card, i) => {
-      const idx = parseInt(card.dataset.dealIndex, 10);
+    const rects = [];
+    cards.forEach((card) => {
       const rect = card.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      const dx = deckX - cx;
-      const dy = deckY - cy;
+      rects.push({ card, cx: rect.left + rect.width / 2, cy: rect.top + rect.height / 2 });
+    });
+    requestAnimationFrame(() => {
+      rects.forEach(({ card, cx, cy }) => {
+        const idx = parseInt(card.dataset.dealIndex, 10);
+        const dx = deckX - cx;
+        const dy = deckY - cy;
 
-      card.animate(
-        [
-          { transform: `translate(${dx}px, ${dy}px) scale(0.85)`, opacity: 0 },
-          { transform: 'translate(0, 0) scale(1)', opacity: 1 }
-        ],
-        {
-          duration,
-          delay: idx * stagger,
-          easing,
-          fill: 'forwards'
-        }
-      ).finished.then(() => {
-        card.classList.remove('harto-card-dealing');
+        card.style.willChange = 'transform, opacity';
+        card.animate(
+          [
+            { transform: `translate3d(${dx}px, ${dy}px, 0) scale(0.9)`, opacity: 0 },
+            { transform: 'translate3d(0, 0, 0) scale(1)', opacity: 1 }
+          ],
+          {
+            duration,
+            delay: idx * stagger,
+            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+            fill: 'forwards'
+          }
+        ).finished.then(() => {
+          card.style.willChange = '';
+          card.classList.remove('harto-card-dealing');
+        });
       });
     });
   });
@@ -146,16 +151,24 @@ function render() {
 
   const byPack = { incomplete: {}, completed: {} };
   PACKS.slice(1).forEach((p) => { byPack.incomplete[p] = []; byPack.completed[p] = []; });
+  let pendingCount = 0;
   cards.forEach((c) => {
     if (!byPack.incomplete[c.pack]) return;
     const done = isCompleted(c.id, completions);
+    if (!done) pendingCount++;
     (done ? byPack.completed : byPack.incomplete)[c.pack].push(c);
   });
 
-  packsEl.innerHTML = PACKS.map(
-    (pack) =>
-      `<button class="harto-pack ${filterPack === pack ? 'active' : ''}" data-pack="${escapeHtml(pack)}">${escapeHtml(pack)}</button>`
-  ).join('');
+  const tasksTab = document.querySelector('.harto-tab[data-tab="tasks"]');
+  if (tasksTab) {
+    tasksTab.innerHTML = 'Tasks' + (pendingCount > 0 ? ` <span class="harto-tab-badge">${pendingCount}</span>` : '');
+  }
+
+  packsEl.innerHTML = PACKS.map((pack) => {
+    const count = (byPack.incomplete[pack] || []).length;
+    const badge = count > 0 ? ` <span class="harto-pack-badge">${count}</span>` : '';
+    return `<button class="harto-pack ${filterPack === pack ? 'active' : ''}" data-pack="${escapeHtml(pack)}">${escapeHtml(pack)}${badge}</button>`;
+  }).join('');
 
   const packsToShow = filterPack === 'All' ? PACKS.slice(1) : [filterPack];
   deckEl.innerHTML = packsToShow.map((pack) => {
