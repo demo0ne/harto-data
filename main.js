@@ -1,10 +1,10 @@
 /**
  * Harto - Card-based To-Do for Heartopia
- * Version: 0.4.0
+ * Version: 0.5.0
  */
 
 const CDN = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
-const VERSION = '0.4.0';
+const VERSION = '0.5.0';
 const STORAGE_COMPLETIONS = 'harto_completions';
 const STORAGE_COMPLETIONS_TW = 'harto_completions_tw';
 const STORAGE_THEME = 'harto_theme';
@@ -89,12 +89,19 @@ function applyResets(completions) {
   if (changed) setCompletions(completions);
 }
 
+function getStepsCompleted(entry) {
+  return entry?.stepsCompleted ?? 0;
+}
+
 function isCompleted(cardId, completions) {
   const entry = completions[cardId];
-  if (!entry) return false;
   const card = window.__HARTO_CARDS?.find((c) => c.id === cardId);
-  if (!card) return true;
-  return !shouldReset(card.pack, entry.date);
+  if (!card) return !!entry;
+  if (!entry) return false;
+  if (shouldReset(card.pack, entry.date)) return false;
+  const steps = card.steps || 0;
+  if (steps > 0) return getStepsCompleted(entry) >= steps;
+  return true;
 }
 
 function getDateKeyForPack(pack) {
@@ -106,7 +113,29 @@ function completeCard(cardId, opts) {
   const completions = getCompletions();
   const card = window.__HARTO_CARDS?.find((c) => c.id === cardId);
   const dateKey = card ? getDateKeyForPack(card.pack) : getToday();
-  completions[cardId] = { date: dateKey, timestamp: Date.now() };
+  const steps = card?.steps || 0;
+  completions[cardId] = {
+    date: dateKey,
+    timestamp: Date.now(),
+    ...(steps > 0 ? { stepsCompleted: steps } : {})
+  };
+  setCompletions(completions);
+  render(opts);
+}
+
+function toggleStep(cardId, stepIndex, opts) {
+  const completions = getCompletions();
+  const card = window.__HARTO_CARDS?.find((c) => c.id === cardId);
+  const steps = card?.steps || 0;
+  if (steps <= 0) return;
+  const dateKey = getDateKeyForPack(card.pack);
+  let entry = completions[cardId];
+  if (!entry || shouldReset(card.pack, entry.date)) entry = { date: dateKey, timestamp: Date.now(), stepsCompleted: 0 };
+  const completed = getStepsCompleted(entry);
+  const stepDone = stepIndex < completed;
+  entry.stepsCompleted = stepDone ? stepIndex : stepIndex + 1;
+  entry.timestamp = Date.now();
+  completions[cardId] = entry;
   setCompletions(completions);
   render(opts);
 }
@@ -121,7 +150,20 @@ function uncompleteCard(cardId, opts) {
 function renderCard(card, completions, done, index) {
   const imgSrc = card.image ? (card.image.startsWith('http') ? card.image : `${CDN}/${card.image}`) : '';
   const approvedUrl = `${CDN}/assets/images/approved.png`;
-  const btnIcon = done ? '✓' : '';
+  const steps = card.steps || 0;
+  const stepsCompleted = getStepsCompleted(completions[card.id]);
+  const isStepCard = steps > 0;
+  let stepsHtml = '';
+  if (isStepCard) {
+    stepsHtml = `<div class="harto-card-steps" data-id="${escapeHtml(card.id)}" data-pack="${escapeHtml(card.pack)}">` +
+      Array.from({ length: steps }, (_, i) => {
+        const checked = i < stepsCompleted;
+        return `<button type="button" class="harto-card-step ${checked ? 'checked' : ''}" data-step="${i}" aria-label="Step ${i + 1}">${checked ? '✓' : ''}</button>`;
+      }).join('') + '</div>';
+  }
+  const mainBtn = !isStepCard
+    ? `<button class="harto-card-complete" data-action="${done ? 'uncomplete' : 'complete'}" title="${done ? 'Undo' : 'Complete'}">${done ? '✓' : ''}</button>`
+    : (done ? `<button class="harto-card-complete" data-action="uncomplete" title="Undo">✓</button>` : stepsHtml);
   const approvedOverlay = done ? `<div class="harto-card-approved" style="background-image: url('${approvedUrl}')"></div>` : '';
   return `
     <div class="harto-card harto-card-dealing ${done ? 'harto-card-completed' : ''}" data-id="${escapeHtml(card.id)}" data-pack="${escapeHtml(card.pack)}" data-deal-index="${index >= 0 ? index : 0}">
@@ -130,7 +172,7 @@ function renderCard(card, completions, done, index) {
         <img class="harto-card-image" src="${imgSrc || ''}" alt="" onerror="this.style.display='none'">
         <div class="harto-card-body">
         ${card.description ? `<p class="harto-card-description">${escapeHtml(card.description)}</p>` : ''}
-        <button class="harto-card-complete" data-action="${done ? 'uncomplete' : 'complete'}" title="${done ? 'Undo' : 'Complete'}">${btnIcon}</button>
+        ${mainBtn}
         </div>
       </div>
       ${approvedOverlay}
@@ -224,7 +266,37 @@ function escapeHtml(s) {
   return div.innerHTML;
 }
 
-const PACKS = ['All', 'Daily', 'Daily-NPC', 'Weekly', 'Seasonal', 'Others'];
+const PACKS = ['All', 'Daily', 'Daily-NPC', 'Weekly', 'Others'];
+
+let __weatherData = null;
+
+async function loadWeatherData() {
+  try {
+    const res = await fetch(`${CDN}/info/weather.json`);
+    const data = await res.json();
+    if (data && typeof data === 'object') __weatherData = data;
+  } catch (_) {}
+}
+
+function getCurrentSeason() {
+  return __weatherData?.season || 'winter';
+}
+
+function getCurrentWeatherBySlot(slot) {
+  if (!__weatherData) return 'sunny';
+  return (__weatherData[slot] || 'sunny').toLowerCase().replace(/\s+/g, '-');
+}
+
+function cardVisible(card) {
+  if (card.active === false) return false;
+  const season = getCurrentSeason();
+  const slot = getTimeSlot();
+  const weather = getCurrentWeatherBySlot(slot);
+  if (card.season && card.season !== 'always' && card.season !== season) return false;
+  if (card.weather && card.weather !== 'any' && card.weather !== weather) return false;
+  if (card.time && card.time !== 'all' && card.time !== slot) return false;
+  return true;
+}
 
 function render(opts) {
   const cards = window.__HARTO_CARDS || [];
@@ -239,6 +311,7 @@ function render(opts) {
   PACKS.slice(1).forEach((p) => { byPack.incomplete[p] = []; byPack.completed[p] = []; });
   let pendingCount = 0;
   cards.forEach((c) => {
+    if (!cardVisible(c)) return;
     if (!byPack.incomplete[c.pack]) return;
     const done = isCompleted(c.id, completions);
     if (!done) pendingCount++;
@@ -296,25 +369,40 @@ function render(opts) {
       const id = cardEl.dataset.id;
       const pack = cardEl.dataset.pack;
       const action = e.target.dataset.action;
-
-      const section = deckEl.querySelector(`[data-pack="${pack}"]`);
+      const section = cardEl.closest('.harto-deck-section');
       const oldRects = new Map();
       if (section) {
         section.querySelectorAll('.harto-card').forEach((c) => {
           oldRects.set(c.dataset.id, c.getBoundingClientRect());
         });
       }
+      if (action === 'complete') completeCard(id, { affectedPack: pack, oldRects });
+      else uncompleteCard(id, { affectedPack: pack, oldRects });
+    });
+  });
 
-      if (action === 'complete') {
-        completeCard(id, { affectedPack: pack, oldRects });
-      } else {
-        uncompleteCard(id, { affectedPack: pack, oldRects });
+  deckEl.querySelectorAll('.harto-card-step').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      const stepsEl = e.target.closest('.harto-card-steps');
+      const cardEl = stepsEl?.closest('.harto-card');
+      if (!stepsEl || !cardEl) return;
+      const id = stepsEl.dataset.id;
+      const pack = stepsEl.dataset.pack;
+      const stepIndex = parseInt(e.target.dataset.step, 10);
+      const section = cardEl.closest('.harto-deck-section');
+      const oldRects = new Map();
+      if (section) {
+        section.querySelectorAll('.harto-card').forEach((c) => {
+          oldRects.set(c.dataset.id, c.getBoundingClientRect());
+        });
       }
+      toggleStep(id, stepIndex, { affectedPack: pack, oldRects });
     });
   });
 }
 
 async function init() {
+  await loadWeatherData();
   const res = await fetch(`${CDN}/cards/data.json`);
   const data = await res.json();
   window.__HARTO_CARDS = data.cards || [];
@@ -383,9 +471,9 @@ function getTimeSlot() {
   return 'night';
 }
 
-const WEATHER_LABELS = {
-  sunny: 'Sunny Day',
-  meteor: 'Meteor Shower',
+const WEATHER_WORDS = {
+  sunny: 'Sunny',
+  meteor: 'Meteor',
   rain: 'Rainy',
   rainbow: 'Rainbow',
   aurora: 'Aurora'
@@ -404,7 +492,10 @@ function createShell() {
       <a href="#" class="harto-topbar-brand">
         <img class="harto-topbar-icon" src="${iconSrc}" alt="">
         <span class="harto-topbar-title"><span class="harto-topbar-title-a">Harto</span>.<span class="harto-topbar-title-b">dashboard</span></span>
-        <span class="harto-setup-label harto-admin-only" id="harto-setup-label">${setup}</span>
+        <span class="harto-setup-label harto-admin-only" id="harto-setup-label">
+          <img class="harto-setup-icon" id="harto-setup-icon" src="${CDN_BASE}/assets/images/${setup}.png" alt="">
+          <span class="harto-setup-text" id="harto-setup-text">${setup}</span>
+        </span>
       </a>
       <div class="harto-topbar-end">
         <button id="harto-setup-toggle" class="harto-setup-toggle harto-admin-only" title="Switch setup (SEA / TW)" aria-label="Switch setup">SEA / TW</button>
@@ -438,14 +529,7 @@ function createShell() {
 }
 
 async function initClock() {
-  let weatherBySlot = { dawn: 'sunny', day: 'sunny', dusk: 'sunny', night: 'sunny' };
-  try {
-    const res = await fetch(`${CDN}/info/weather.json`);
-    const data = await res.json();
-    if (data && typeof data === 'object') {
-      weatherBySlot = { ...weatherBySlot, ...data };
-    }
-  } catch (_) {}
+  await loadWeatherData();
 
   function updateClock() {
     const now = new Date();
@@ -459,9 +543,11 @@ async function initClock() {
     const dateStr = `${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`;
 
     const slot = getTimeSlot();
-    const weather = (weatherBySlot[slot] || 'sunny').toLowerCase().replace(/\s+/g, '-');
+    const weather = getCurrentWeatherBySlot(slot);
     const validWeather = ['sunny', 'meteor', 'rain', 'rainbow', 'aurora'].includes(weather) ? weather : 'sunny';
-    const label = WEATHER_LABELS[validWeather] || 'Sunny Day';
+    const weatherWord = WEATHER_WORDS[validWeather] || 'Sunny';
+    const slotWord = slot.charAt(0).toUpperCase() + slot.slice(1);
+    const label = `${weatherWord} ${slotWord}`;
     const imgName = validWeather === 'sunny' ? slot : validWeather;
     const imgSrc = `${CDN}/assets/images/weather/${imgName}.png`;
 
@@ -487,17 +573,26 @@ function initSetup() {
   applySetup();
   const admin = isAdmin();
   document.querySelectorAll('.harto-admin-only').forEach((el) => {
-    el.style.display = admin ? (el.classList.contains('harto-setup-toggle') ? 'flex' : 'inline') : 'none';
+    el.style.display = admin
+      ? (el.classList.contains('harto-setup-toggle') ? 'flex' : el.classList.contains('harto-setup-label') ? 'inline-flex' : 'inline')
+      : 'none';
   });
   const $label = document.getElementById('harto-setup-label');
+  const $icon = document.getElementById('harto-setup-icon');
+  const $text = document.getElementById('harto-setup-text');
+  const CDN_BASE = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
+  function updateSetupLabel(s) {
+    if ($icon) $icon.src = `${CDN_BASE}/assets/images/${s}.png`;
+    if ($text) $text.textContent = s;
+  }
+  updateSetupLabel(getSetup());
   const $toggle = document.getElementById('harto-setup-toggle');
-  if ($label) $label.textContent = getSetup();
   if ($toggle && admin) {
     $toggle.addEventListener('click', () => {
       const next = getSetup() === 'SEA' ? 'TW' : 'SEA';
       localStorage.setItem(STORAGE_SETUP, next);
       applySetup();
-      if ($label) $label.textContent = next;
+      updateSetupLabel(next);
       window.dispatchEvent(new CustomEvent('harto:setupChange'));
       render();
     });
