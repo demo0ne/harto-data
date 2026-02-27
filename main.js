@@ -1,10 +1,10 @@
 /**
  * Harto - Card-based To-Do for Heartopia
- * Version: 0.7.5
+ * Version: 0.7.6
  */
 
 const CDN = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
-const VERSION = '0.7.5';
+const VERSION = '0.7.6';
 const STORAGE_COMPLETIONS = 'harto_completions';
 const STORAGE_COMPLETIONS_TW = 'harto_completions_tw';
 const STORAGE_THEME = 'harto_theme';
@@ -125,6 +125,64 @@ function getDateKeyForPack(pack) {
   return getToday();
 }
 
+function getApprovedUrl() {
+  const base = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
+  return `${base}/assets/images/approved.png`;
+}
+
+function runCompleteAnimation(cardEl, packEl, opts) {
+  const imageWrap = cardEl?.querySelector('.harto-card-image-wrap');
+  if (!imageWrap || !packEl) {
+    render(opts);
+    return;
+  }
+  const approvedEl = document.createElement('div');
+  approvedEl.className = 'harto-card-approved harto-card-approved-stamping';
+  approvedEl.style.backgroundImage = `url('${getApprovedUrl()}')`;
+  imageWrap.appendChild(approvedEl);
+  cardEl.classList.add('harto-card-completed');
+  cardEl.style.zIndex = '10';
+
+  const stampDuration = 420;
+  const flyDuration = 350;
+
+  approvedEl.animate(
+    [
+      { transform: 'scale(3)', opacity: 0.9 },
+      { transform: 'scale(1)', opacity: 1 }
+    ],
+    { duration: stampDuration, easing: 'cubic-bezier(0.34, 1.56, 0.64, 1)', fill: 'forwards' }
+  ).finished.then(() => {
+    approvedEl.classList.remove('harto-card-approved-stamping');
+    const wiggleDuration = 280;
+    cardEl.animate(
+      [
+        { transform: 'translate(0, 0) rotate(0deg)' },
+        { transform: 'translate(0, 0) rotate(-4deg)' },
+        { transform: 'translate(0, 0) rotate(4deg)' },
+        { transform: 'translate(0, 0) rotate(-2deg)' },
+        { transform: 'translate(0, 0) rotate(0deg)' }
+      ],
+      { duration: wiggleDuration, easing: 'ease-in-out' }
+    ).finished.then(() => {
+      const packRect = packEl.getBoundingClientRect();
+      const cardRect = cardEl.getBoundingClientRect();
+      const dx = packRect.left + packRect.width / 2 - (cardRect.left + cardRect.width / 2);
+      const dy = packRect.top + packRect.height / 2 - (cardRect.top + cardRect.height / 2);
+      cardEl.animate(
+        [
+          { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+          { transform: `translate(${dx}px, ${dy}px) scale(0.3)`, opacity: 0 }
+        ],
+        { duration: flyDuration, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' }
+      ).finished.then(() => {
+        cardEl.style.zIndex = '';
+        render(opts);
+      });
+    });
+  });
+}
+
 function completeCard(cardId, opts) {
   const completions = getCompletions();
   const card = window.__HARTO_CARDS?.find((c) => c.id === cardId);
@@ -140,18 +198,7 @@ function completeCard(cardId, opts) {
   const packEl = opts?.flyToPack;
   const cardEl = document.querySelector(`.harto-card[data-id="${cardId}"]`);
   if (packEl && cardEl) {
-    const packRect = packEl.getBoundingClientRect();
-    const cardRect = cardEl.getBoundingClientRect();
-    const dx = packRect.left + packRect.width / 2 - (cardRect.left + cardRect.width / 2);
-    const dy = packRect.top + packRect.height / 2 - (cardRect.top + cardRect.height / 2);
-    cardEl.style.zIndex = '10';
-    cardEl.animate(
-      [
-        { transform: 'translate(0, 0) scale(1)', opacity: 1 },
-        { transform: `translate(${dx}px, ${dy}px) scale(0.3)`, opacity: 0 }
-      ],
-      { duration: 350, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' }
-    ).finished.then(() => render(opts));
+    runCompleteAnimation(cardEl, packEl, opts);
   } else {
     render(opts);
   }
@@ -177,18 +224,7 @@ function toggleStep(cardId, stepIndex, opts) {
   const section = cardEl?.closest('.harto-deck-section');
   const packEl = section?.querySelector('.harto-deck-pack');
   if (allDone && packEl && cardEl) {
-    const packRect = packEl.getBoundingClientRect();
-    const cardRect = cardEl.getBoundingClientRect();
-    const dx = packRect.left + packRect.width / 2 - (cardRect.left + cardRect.width / 2);
-    const dy = packRect.top + packRect.height / 2 - (cardRect.top + cardRect.height / 2);
-    cardEl.style.zIndex = '10';
-    cardEl.animate(
-      [
-        { transform: 'translate(0, 0) scale(1)', opacity: 1 },
-        { transform: `translate(${dx}px, ${dy}px) scale(0.3)`, opacity: 0 }
-      ],
-      { duration: 350, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' }
-    ).finished.then(() => render(opts));
+    runCompleteAnimation(cardEl, packEl, opts);
   } else {
     render(opts);
   }
@@ -239,7 +275,7 @@ function renderCard(card, completions, done, index) {
       <div class="harto-card-content">
         <div class="harto-card-left">
           <span class="harto-card-complete-wrap">${completeBtn}</span>
-          <div class="harto-card-image-wrap${imageWrapExpiredClass}"><img class="harto-card-image" src="${imgSrc || ''}" alt="" onerror="this.style.display='none'">${locationOverlay}${expiredImg}</div>
+          <div class="harto-card-image-wrap${imageWrapExpiredClass}"><img class="harto-card-image" src="${imgSrc || ''}" alt="" onerror="this.style.display='none'">${locationOverlay}${expiredImg}${approvedOverlay}</div>
         </div>
         <div class="harto-card-right">
           ${isStepCard ? `<div class="harto-card-steps-row">${stepsHtml}</div>` : ''}
@@ -254,7 +290,6 @@ function renderCard(card, completions, done, index) {
           </div>
         </div>
       </div>
-      ${approvedOverlay}
     </div>
   `;
 }

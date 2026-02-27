@@ -865,6 +865,11 @@ html:not([data-theme="dark"]) .harto-topbar {
   position: absolute;
   right: 0.5rem;
   bottom: 0.5rem;
+  width: 3rem;
+  height: 3rem;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .harto-deck-completed {
@@ -988,7 +993,8 @@ html:not([data-theme="dark"]) .harto-topbar {
   animation-delay: 0s;
 }
 
-.harto-card.harto-card-completed .harto-card-content {
+.harto-card.harto-card-completed .harto-card-image,
+.harto-card.harto-card-completed .harto-card-right {
   filter: grayscale(1);
 }
 
@@ -1001,17 +1007,20 @@ html:not([data-theme="dark"]) .harto-topbar {
   color: var(--text-muted);
 }
 
-.harto-card-approved {
+.harto-card-image-wrap .harto-card-approved {
   position: absolute;
-  right: 0.5rem;
-  bottom: 0.5rem;
-  width: 3rem;
-  height: 3rem;
+  inset: 10%;
+  width: 80%;
+  height: 80%;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   pointer-events: none;
-  z-index: 2;
+  transform-origin: center center;
+}
+
+.harto-card-approved-stamping {
+  transform-origin: center center;
 }
 
 @keyframes harto-card-exit {
