@@ -45,7 +45,12 @@
       "pack": "Daily",
       "title": "🌴 Rainbow Tree",
       "description": "MLP Collab. Collect Gems from friends then water the tree.",
-      "image": "assets/images/Daily/rainbow_tree.png"
+      "image": "assets/images/Daily/rainbow_tree.png",
+      "season": "always",
+      "weather": "any",
+      "time": "all",
+      "active": true,
+      "steps": 2
     },
     {
       "id": "egg-machine",
