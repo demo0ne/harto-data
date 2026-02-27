@@ -1,5 +1,5 @@
 /* Harto - Card-based To-Do for Heartopia */
-/* Version: 0.5.0 */
+/* Version: 0.6.0 */
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
 
@@ -512,6 +512,74 @@ html:not([data-theme="dark"]) .harto-topbar {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--card-width), 1fr));
   gap: 1.25rem;
+}
+
+.harto-deck-pack {
+  width: var(--card-width);
+  aspect-ratio: var(--card-aspect);
+  background: var(--surface);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.harto-deck-pack:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+.harto-deck-pack-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.harto-deck-pack-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  line-height: 1.3;
+  order: -1;
+  flex-shrink: 0;
+}
+
+.harto-deck-pack-image {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  object-fit: cover;
+  object-position: center;
+  background: var(--border);
+}
+
+.harto-deck-pack .harto-card-approved {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.5rem;
+}
+
+.harto-deck-completed {
+  display: contents;
+}
+
+.harto-deck-completed:not(.harto-deck-completed-visible) .harto-card {
+  display: none !important;
+}
+
+.harto-deck-completed.harto-deck-completed-visible {
+  display: contents;
+}
+
+.harto-pack-dealing {
+  opacity: 1;
 }
 
 .harto-card-divider-wrap {

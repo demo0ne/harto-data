@@ -1,10 +1,10 @@
 /**
  * Harto - Card-based To-Do for Heartopia
- * Version: 0.5.0
+ * Version: 0.6.0
  */
 
 const CDN = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
-const VERSION = '0.5.0';
+const VERSION = '0.6.0';
 const STORAGE_COMPLETIONS = 'harto_completions';
 const STORAGE_COMPLETIONS_TW = 'harto_completions_tw';
 const STORAGE_THEME = 'harto_theme';
@@ -114,14 +114,6 @@ function completeCard(cardId, opts) {
   const card = window.__HARTO_CARDS?.find((c) => c.id === cardId);
   const dateKey = card ? getDateKeyForPack(card.pack) : getToday();
   const steps = card?.steps || 0;
-  const stepsDone = steps > 0 ? getStepsCompleted(completions[cardId]) + 1 : 1;
-  const allStepsDone = steps <= 0 || stepsDone >= steps;
-  if (!allStepsDone) {
-    completions[cardId] = { date: dateKey, timestamp: Date.now(), stepsCompleted: stepsDone };
-    setCompletions(completions);
-    render(opts);
-    return;
-  }
   completions[cardId] = {
     date: dateKey,
     timestamp: Date.now(),
@@ -163,7 +155,27 @@ function toggleStep(cardId, stepIndex, opts) {
   entry.timestamp = Date.now();
   completions[cardId] = entry;
   setCompletions(completions);
-  render(opts);
+
+  const allDone = entry.stepsCompleted >= steps;
+  const cardEl = document.querySelector(`.harto-card[data-id="${cardId}"]`);
+  const section = cardEl?.closest('.harto-deck-section');
+  const packEl = section?.querySelector('.harto-deck-pack');
+  if (allDone && packEl && cardEl) {
+    const packRect = packEl.getBoundingClientRect();
+    const cardRect = cardEl.getBoundingClientRect();
+    const dx = packRect.left + packRect.width / 2 - (cardRect.left + cardRect.width / 2);
+    const dy = packRect.top + packRect.height / 2 - (cardRect.top + cardRect.height / 2);
+    cardEl.style.zIndex = '10';
+    cardEl.animate(
+      [
+        { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+        { transform: `translate(${dx}px, ${dy}px) scale(0.3)`, opacity: 0 }
+      ],
+      { duration: 350, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'forwards' }
+    ).finished.then(() => render(opts));
+  } else {
+    render(opts);
+  }
 }
 
 function uncompleteCard(cardId, opts) {
@@ -254,11 +266,9 @@ function playDealAnimation(deckEl) {
         packEl.classList.remove('harto-pack-dealing');
         if (completedContainer && window.__HARTO_PACK_EXPANDED?.[section.dataset.pack]]) {
           completedContainer.classList.add('harto-deck-completed-visible');
-          completedContainer.querySelectorAll('.harto-card').forEach((c) => c.classList.remove('harto-card-dealing'));
-        } else if (completedContainer) {
-          completedContainer.querySelectorAll('.harto-card').forEach((c) => c.classList.remove('harto-card-dealing'));
         }
-      }, delay);
+        completedContainer?.querySelectorAll('.harto-card').forEach((c) => c.classList.remove('harto-card-dealing'));
+      }, delay + duration);
     });
   });
 }
@@ -309,7 +319,8 @@ function escapeHtml(s) {
 }
 
 function packImageSlug(pack) {
-  return (pack || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || 'others';
+  const s = (pack || 'others').toLowerCase().replace(/\s+/g, '-');
+  return s.replace(/[^a-z0-9-]/g, '') || 'others';
 }
 
 function renderPack(packName, hasCompleted) {
