@@ -1,5 +1,5 @@
 /* Harto - Card-based To-Do for Heartopia */
-/* Version: 0.7.6 */
+/* Version: 0.9.2 */
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
 
@@ -507,6 +507,275 @@ html:not([data-theme="dark"]) .harto-topbar {
   border-color: var(--accent);
 }
 
+.harto-add-custom {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--border);
+  transition: all 0.2s ease;
+}
+
+.harto-add-custom:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.harto-show-inactive-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.harto-toggle-wrap {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.harto-toggle-wrap input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+.harto-toggle-slider {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 36px;
+  height: 20px;
+  background: var(--border);
+  border-radius: 20px;
+  transition: 0.25s;
+}
+
+.harto-toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  left: 3px;
+  bottom: 3px;
+  background: var(--surface);
+  border-radius: 50%;
+  transition: 0.25s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.harto-show-inactive-wrap .harto-show-inactive:checked + .harto-toggle-slider,
+.harto-toggle-wrap input:checked + .harto-toggle-slider {
+  background: var(--accent);
+}
+
+.harto-show-inactive-wrap .harto-show-inactive:checked + .harto-toggle-slider::before,
+.harto-toggle-wrap input:checked + .harto-toggle-slider::before {
+  transform: translateX(16px);
+}
+
+.harto-show-inactive-label {
+  white-space: nowrap;
+}
+
+/* Custom task modal */
+.harto-custom-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.harto-custom-modal-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.harto-custom-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.harto-custom-modal-content {
+  position: relative;
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border);
+}
+
+.harto-custom-modal-title {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.harto-custom-form .harto-form-row {
+  margin-bottom: 1rem;
+}
+
+.harto-custom-active-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.harto-custom-active-row .harto-form-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.harto-custom-form .harto-form-row label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 0.35rem;
+}
+
+.harto-custom-form input,
+.harto-custom-form textarea,
+.harto-custom-form select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-size: 1rem;
+  font-family: inherit;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.harto-custom-modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+}
+
+.harto-btn-primary,
+.harto-btn-secondary {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
+}
+
+.harto-btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.harto-btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+.harto-btn-secondary {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.harto-btn-secondary:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.harto-btn-danger {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border: none;
+  background: #dc2626;
+  color: #fff;
+}
+
+.harto-btn-danger:hover {
+  background: #b91c1c;
+}
+
+/* Delete confirmation modal */
+.harto-confirm-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.harto-confirm-modal.harto-confirm-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.harto-confirm-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.harto-confirm-content {
+  position: relative;
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border);
+}
+
+.harto-confirm-message {
+  margin: 0 0 1.25rem;
+  font-size: 1rem;
+  color: var(--text);
+}
+
+.harto-confirm-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
 /* Packs area */
 .harto-packs {
   display: flex;
@@ -991,6 +1260,80 @@ html:not([data-theme="dark"]) .harto-topbar {
 
 .harto-card-drag-handle:hover {
   opacity: 1;
+}
+
+/* Custom card indicator - accent stripe on left */
+.harto-card-custom {
+  border-left: 3px solid var(--accent);
+}
+
+.harto-card-custom-indicator {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.8;
+  z-index: 2;
+}
+
+.harto-card-custom-actions-bottom {
+  display: flex;
+  justify-content: center;
+  margin: 0.2rem 0 0;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.harto-card:hover .harto-card-custom-actions-bottom {
+  opacity: 1;
+}
+
+.harto-card-custom-actions {
+  display: flex;
+  gap: 0.15rem;
+  align-items: center;
+}
+
+.harto-card-custom-btn {
+  padding: 0.1rem 0.25rem;
+  font-size: 0.75rem;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.harto-card-custom-btn:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.harto-card-custom-btn[data-action="delete"]:hover {
+  background: rgba(248, 113, 113, 0.2);
+  color: var(--cm-danger, #f87171);
+}
+
+.harto-card-reactivate {
+  padding: 0.35rem 0.6rem;
+  font-size: 1rem;
+  border: none;
+  background: var(--accent-soft);
+  color: var(--accent);
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.harto-card-reactivate:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.harto-card-inactive-custom {
+  opacity: 0.75;
 }
 
 .harto-card-content {
