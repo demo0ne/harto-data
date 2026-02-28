@@ -260,6 +260,18 @@
       "time": "all",
       "active": true,
       "steps": 4
+    },
+    {
+      "id": "fashionwave-memory",
+      "pack": "Others",
+      "title": "📖 Fashionwave  Memory 5",
+      "description": "",
+      "image": "assets/images/placeholder.png",
+      "season": "winter",
+      "weather": "any",
+      "time": "all",
+      "active": true,
+      "steps": 2
     }
   ]
 }

@@ -1,10 +1,10 @@
 /**
  * Harto - Card-based To-Do for Heartopia
- * Version: 0.7.9
+ * Version: 0.8.0
  */
 
 const CDN = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
-const VERSION = '0.7.9';
+const VERSION = '0.8.0';
 if (typeof window !== 'undefined') window.__HARTO_VERSION_JS = VERSION;
 const STORAGE_COMPLETIONS = 'harto_completions';
 const STORAGE_COMPLETIONS_TW = 'harto_completions_tw';
@@ -322,7 +322,7 @@ function uncompleteCard(cardId, opts) {
 }
 
 function renderCard(card, completions, done, index, opts) {
-  const weeklyMerge = (opts?.mergeWindow && card.pack === 'Weekly');
+  const weeklyMerge = (opts?.mergeWindow && card.pack === 'Weekly') || opts?.expiryDay;
   const imgSrc = card.image ? (card.image.startsWith('http') ? card.image : `${CDN}/${card.image}`) : '';
   const approvedUrl = `${CDN}/assets/images/approved.png`;
   const steps = card.steps || 0;
@@ -578,7 +578,9 @@ function render(opts) {
     if (!byPack.incomplete[c.pack]) return;
     const done = isCompleted(c.id, completions);
     if (!done) pendingCount++;
-    const displayPack = mergeWindow && c.pack === 'Weekly' ? 'Daily' : c.pack;
+    let displayPack = c.pack;
+    if (mergeWindow && c.pack === 'Weekly') displayPack = 'Daily';
+    else if (isExpiryDay(c)) displayPack = 'Daily';
     (done ? byPack.completed : byPack.incomplete)[displayPack].push(c);
   });
 
@@ -603,8 +605,8 @@ function render(opts) {
     if (incomplete.length === 0 && completed.length === 0) return '';
     let packHtml = renderPack(pack, completed.length > 0, completed.length, !!packExpanded[pack]);
     if (incomplete.length > 0) packHtml = `<span class="harto-card-divider-wrap">${packHtml}</span>`;
-    const incompleteHtml = incomplete.map((c, i) => renderCard(c, completions, false, i, { mergeWindow })).join('');
-    const completedCards = completed.map((c, i) => renderCard(c, completions, true, incomplete.length + 1 + i, { mergeWindow }));
+    const incompleteHtml = incomplete.map((c, i) => renderCard(c, completions, false, i, { mergeWindow, expiryDay: isExpiryDay(c) })).join('');
+    const completedCards = completed.map((c, i) => renderCard(c, completions, true, incomplete.length + 1 + i, { mergeWindow, expiryDay: isExpiryDay(c) }));
     const completedWrapperClass = packExpanded[pack] ? 'harto-deck-completed-visible' : '';
     const completedInner = completedCards.join('');
     const completedHtml = completedCards.length > 0
