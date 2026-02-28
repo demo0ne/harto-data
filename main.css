@@ -357,7 +357,7 @@ html:not([data-theme="dark"]) .harto-topbar {
 .harto-clock-block {
   position: absolute;
   top: 0.35rem;
-  left: 1.5rem;
+  right: 1.5rem;
   display: flex;
   align-items: center;
   gap: 1.15rem;
