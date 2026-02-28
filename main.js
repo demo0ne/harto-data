@@ -565,8 +565,9 @@ function renderPack(packName, hasCompleted, completedCount, isExpanded) {
   const countBadge = (hasCompleted && !isExpanded && completedCount > 0)
     ? ` <span class="harto-pack-completed-badge">${completedCount}</span>`
     : '';
+  const borderThickness = isExpanded ? 4 : 4 + Math.min(completedCount, 18);
   return `
-    <div class="harto-deck-pack" data-pack="${escapeHtml(packName)}" role="button" tabindex="0" aria-label="Toggle completed cards">
+    <div class="harto-deck-pack" data-pack="${escapeHtml(packName)}" data-completed="${completedCount}" style="--pack-border-thickness: ${borderThickness}px" role="button" tabindex="0" aria-label="Toggle completed cards">
       <div class="harto-deck-pack-content">
         <h3 class="harto-deck-pack-title">${escapeHtml(packName)} · Completed${countBadge}</h3>
         <img class="harto-deck-pack-image" src="${imgSrc}" alt="" onerror="this.style.display='none'">
@@ -814,6 +815,8 @@ function render(opts) {
       if (!completedEl || completedEl.querySelectorAll('.harto-card').length === 0) return;
       const isExpanding = !window.__HARTO_PACK_EXPANDED[pack];
       window.__HARTO_PACK_EXPANDED[pack] = isExpanding;
+      const completedCount = completedEl.querySelectorAll('.harto-card').length;
+      packEl.style.setProperty('--pack-border-thickness', isExpanding ? '4px' : `${4 + Math.min(completedCount, 18)}px`);
       const packRect = packEl.getBoundingClientRect();
       const cards = Array.from(completedEl.querySelectorAll('.harto-card'));
       if (isExpanding) {

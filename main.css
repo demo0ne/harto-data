@@ -1102,6 +1102,10 @@ html:not([data-theme="dark"]) .harto-topbar {
   display: flex;
   flex-direction: column;
   border: 1px solid var(--border);
+  border-left-width: var(--pack-border-thickness, 4px);
+  border-top-width: var(--pack-border-thickness, 4px);
+  border-left-color: var(--accent);
+  border-top-color: var(--accent);
   position: relative;
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
