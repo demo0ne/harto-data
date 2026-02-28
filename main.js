@@ -1164,16 +1164,17 @@ function createShell() {
   const setup = getSetup();
   document.body.innerHTML = `
     <header class="harto-topbar">
-      <a href="#" class="harto-topbar-brand">
-        <img class="harto-topbar-icon" src="${iconSrc}" alt="">
-        <span class="harto-topbar-title"><span class="harto-topbar-title-a">Harto</span>.<span class="harto-topbar-title-b">dashboard</span></span>
-        <span class="harto-setup-label harto-admin-only" id="harto-setup-label">
+      <div class="harto-topbar-left">
+        <a href="#" class="harto-topbar-brand">
+          <img class="harto-topbar-icon" src="${iconSrc}" alt="">
+          <span class="harto-topbar-title"><span class="harto-topbar-title-a">Harto</span>.<span class="harto-topbar-title-b">dashboard</span></span>
+        </a>
+        <button type="button" class="harto-setup-label harto-admin-only" id="harto-setup-label" title="Switch setup (SEA / TW)" aria-label="Switch setup">
           <img class="harto-setup-icon" id="harto-setup-icon" src="${CDN_BASE}/assets/images/${setup.toLowerCase()}.png" alt="">
           <span class="harto-setup-text" id="harto-setup-text">${setup}</span>
-        </span>
-      </a>
+        </button>
+      </div>
       <div class="harto-topbar-end">
-        <button id="harto-setup-toggle" class="harto-setup-toggle harto-admin-only" title="Switch setup (SEA / TW)" aria-label="Switch setup">SEA / TW</button>
         <button id="harto-theme-toggle" class="harto-theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">🌙</button>
       </div>
     </header>
@@ -1306,7 +1307,7 @@ function initSetup() {
   const admin = isAdmin();
   document.querySelectorAll('.harto-admin-only').forEach((el) => {
     el.style.display = admin
-      ? (el.classList.contains('harto-setup-toggle') ? 'flex' : el.classList.contains('harto-setup-label') ? 'inline-flex' : 'inline')
+      ? (el.classList.contains('harto-setup-label') ? 'inline-flex' : 'inline')
       : 'none';
   });
   const $label = document.getElementById('harto-setup-label');
@@ -1318,9 +1319,8 @@ function initSetup() {
     if ($text) $text.textContent = s;
   }
   updateSetupLabel(getSetup());
-  const $toggle = document.getElementById('harto-setup-toggle');
-  if ($toggle && admin) {
-    $toggle.addEventListener('click', () => {
+  if ($label && admin) {
+    $label.addEventListener('click', () => {
       const next = getSetup() === 'SEA' ? 'TW' : 'SEA';
       localStorage.setItem(STORAGE_SETUP, next);
       applySetup();

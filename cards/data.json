@@ -288,6 +288,20 @@
       "timeLimited": false,
       "expiryDate": "",
       "steps": 10
+    },
+    {
+      "id": "home-eval",
+      "pack": "Weekly",
+      "title": "🏠🎖️ Home Eval",
+      "description": "",
+      "image": "assets/images/placeholder.png",
+      "season": "always",
+      "weather": "any",
+      "time": "all",
+      "active": true,
+      "timeLimited": false,
+      "expiryDate": "",
+      "steps": 0
     }
   ]
 }
