@@ -248,6 +248,18 @@
       "time": "all",
       "active": true,
       "steps": 2
+    },
+    {
+      "id": "collectors-challenge",
+      "pack": "Others",
+      "title": "📦 Collector's Challenge 5",
+      "description": "",
+      "image": "assets/images/placeholder.png",
+      "season": "winter",
+      "weather": "any",
+      "time": "all",
+      "active": true,
+      "steps": 4
     }
   ]
 }

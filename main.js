@@ -537,8 +537,20 @@ function getCurrentWeatherBySlot(slot) {
   return (__weatherData[slot] || 'sunny').toLowerCase().replace(/\s+/g, '-');
 }
 
+function isTimeLimitedExpired(card) {
+  if (!card.timeLimited || !card.expiryDate) return false;
+  const today = getToday();
+  return today > card.expiryDate.trim();
+}
+
+function isExpiryDay(card) {
+  if (!card.timeLimited || !card.expiryDate) return false;
+  return getToday() === card.expiryDate.trim();
+}
+
 function cardVisible(card) {
   if (card.active === false) return false;
+  if (isTimeLimitedExpired(card)) return false;
   const season = getCurrentSeason();
   const slot = getTimeSlot();
   const weather = getCurrentWeatherBySlot(slot);
