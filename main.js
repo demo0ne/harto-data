@@ -1,10 +1,10 @@
 /**
  * Harto - Card-based To-Do for Heartopia
- * Version: 0.7.8
+ * Version: 0.7.9
  */
 
 const CDN = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
-const VERSION = '0.7.8';
+const VERSION = '0.7.9';
 if (typeof window !== 'undefined') window.__HARTO_VERSION_JS = VERSION;
 const STORAGE_COMPLETIONS = 'harto_completions';
 const STORAGE_COMPLETIONS_TW = 'harto_completions_tw';
@@ -809,7 +809,7 @@ function createShell() {
         <img class="harto-topbar-icon" src="${iconSrc}" alt="">
         <span class="harto-topbar-title"><span class="harto-topbar-title-a">Harto</span>.<span class="harto-topbar-title-b">dashboard</span></span>
         <span class="harto-setup-label harto-admin-only" id="harto-setup-label">
-          <img class="harto-setup-icon" id="harto-setup-icon" src="${CDN_BASE}/assets/images/${setup}.png" alt="">
+          <img class="harto-setup-icon" id="harto-setup-icon" src="${CDN_BASE}/assets/images/${setup.toLowerCase()}.png" alt="">
           <span class="harto-setup-text" id="harto-setup-text">${setup}</span>
         </span>
       </a>
@@ -902,7 +902,7 @@ function initSetup() {
   const $text = document.getElementById('harto-setup-text');
   const CDN_BASE = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
   function updateSetupLabel(s) {
-    if ($icon) $icon.src = `${CDN_BASE}/assets/images/${s}.png`;
+    if ($icon) $icon.src = `${CDN_BASE}/assets/images/${s.toLowerCase()}.png`;
     if ($text) $text.textContent = s;
   }
   updateSetupLabel(getSetup());
