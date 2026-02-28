@@ -94,6 +94,18 @@
       "steps": 0
     },
     {
+      "id": "research-lab",
+      "pack": "Daily-NPC",
+      "title": "🔬 Research Lab",
+      "description": "Self-service lab. Check if your research is done or discount in store.",
+      "image": "assets/images/Daily-NPC/research_lab.jpg",
+      "season": "always",
+      "weather": "any",
+      "time": "all",
+      "active": true,
+      "steps": 0
+    },
+    {
       "id": "bob",
       "pack": "Daily-NPC",
       "title": "🪑 Bob",
@@ -130,35 +142,23 @@
       "steps": 0
     },
     {
-      "id": "ka-ching",
-      "pack": "Daily-NPC",
-      "title": "🧩 Ka Ching",
-      "description": "Gen. Merch Store. Check daily puzzle.",
-      "image": "assets/images/Daily-NPC/kaching.png",
-      "season": "always",
-      "weather": "any",
-      "time": "all",
-      "active": true,
-      "steps": 0
-    },
-    {
-      "id": "research-lab",
-      "pack": "Daily-NPC",
-      "title": "🔬 Research Lab",
-      "description": "Self-service lab. Check if your research is done or discount in store.",
-      "image": "assets/images/Daily-NPC/research_lab.jpg",
-      "season": "always",
-      "weather": "any",
-      "time": "all",
-      "active": true,
-      "steps": 0
-    },
-    {
       "id": "bailey-j",
       "pack": "Daily-NPC",
       "title": "💾 Bailey J",
       "description": "🕊️ The higher you fly...  Submit info cards daily.",
       "image": "assets/images/Daily-NPC/baileyj.png",
+      "season": "always",
+      "weather": "any",
+      "time": "all",
+      "active": true,
+      "steps": 0
+    },
+    {
+      "id": "ka-ching",
+      "pack": "Daily-NPC",
+      "title": "🧩 Ka Ching",
+      "description": "Gen. Merch Store. Check daily puzzle.",
+      "image": "assets/images/Daily-NPC/kaching.png",
       "season": "always",
       "weather": "any",
       "time": "all",
@@ -265,12 +265,14 @@
       "id": "fashionwave-memory",
       "pack": "Others",
       "title": "📖 Fashionwave  Memory 5",
-      "description": "",
+      "description": "Pic 📷 in a house part 🏠🎉\nPic 📷 in Concert 🎤🎶",
       "image": "assets/images/placeholder.png",
       "season": "winter",
       "weather": "any",
       "time": "all",
       "active": true,
+      "timeLimited": false,
+      "expiryDate": "",
       "steps": 2
     },
     {
