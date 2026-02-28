@@ -182,11 +182,13 @@
       "pack": "Daily",
       "title": "🌠 Doris (Meteor)",
       "description": "Found in the bus station where the meteor is. Buy meteor-themed furniture using shards.",
-      "image": "assets/images/placeholder.png",
+      "image": "assets/images/Daily/doris_meteor.png",
       "season": "always",
       "weather": "meteor",
       "time": "all",
       "active": true,
+      "timeLimited": false,
+      "expiryDate": "",
       "steps": 0
     },
     {
@@ -230,11 +232,13 @@
       "pack": "Daily",
       "title": "🌠 Meteor Shards",
       "description": "Gather shards from 9 nodes",
-      "image": "assets/images/placeholder.png",
+      "image": "assets/images/Daily/meteor-rain.png",
       "season": "always",
       "weather": "meteor",
       "time": "all",
       "active": true,
+      "timeLimited": false,
+      "expiryDate": "",
       "steps": 0
     },
     {
