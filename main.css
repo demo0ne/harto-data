@@ -1,7 +1,7 @@
 /* Harto - Card-based To-Do for Heartopia */
 /* Version: 0.9.3 */
 
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Fredoka:wght@400;500;600&display=swap');
 
 :root {
   --card-width: 180px;
@@ -357,8 +357,7 @@ html:not([data-theme="dark"]) .harto-topbar {
 .harto-clock-block {
   position: absolute;
   top: 0.35rem;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 1.5rem;
   display: flex;
   align-items: center;
   gap: 1.15rem;
@@ -378,6 +377,7 @@ html:not([data-theme="dark"]) .harto-topbar {
 }
 
 .harto-clock-row #harto-time {
+  font-family: 'Fredoka', 'Outfit', system-ui, sans-serif;
   font-size: 1.9rem;
   font-weight: 600;
   letter-spacing: 0.02em;
