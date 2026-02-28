@@ -1,10 +1,10 @@
 /**
  * Harto - Card-based To-Do for Heartopia
- * Version: 0.9.4
+ * Version: 0.10.0
  */
 
 const CDN = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
-const VERSION = '0.9.4';
+const VERSION = '0.10.0';
 if (typeof window !== 'undefined') window.__HARTO_VERSION_JS = VERSION;
 const STORAGE_COMPLETIONS = 'harto_completions';
 const STORAGE_COMPLETIONS_TW = 'harto_completions_tw';
@@ -896,6 +896,8 @@ function render(opts) {
       toggleStep(id, stepIndex, { affectedPack: pack, oldRects });
     });
   });
+
+  updateReminderToasts();
 }
 
 function addCustomCard(card) {
@@ -1076,6 +1078,175 @@ function initCustomTasks() {
   }
 }
 
+function getVisibleGuides(guides) {
+  if (!Array.isArray(guides)) return [];
+  const today = formatDate(new Date());
+  return guides.filter((g) => {
+    if (!g.active) return false;
+    if (g.timeLimited && g.expiryDate) {
+      if (today > g.expiryDate) return false;
+    }
+    return true;
+  });
+}
+
+function guideImageUrl(guideId, filename) {
+  return `${CDN}/assets/images/guides/${guideId}/${filename}`;
+}
+
+function renderGuidesBookshelf(guides) {
+  const shelf = document.getElementById('harto-guides-bookshelf');
+  const reader = document.getElementById('harto-guides-reader');
+  if (!shelf || !reader) return;
+  shelf.style.display = '';
+  reader.style.display = 'none';
+  if (!guides.length) {
+    shelf.innerHTML = '<p class="harto-placeholder">No guides available.</p>';
+    return;
+  }
+  shelf.innerHTML = guides.map((g) => {
+    const coverSrc = guideImageUrl(g.id, 'cover.png');
+    return `<button type="button" class="harto-guides-book-cover" data-guide-id="${escapeHtml(g.id)}" title="${escapeHtml(g.title)}">
+      <img src="${coverSrc}" alt="${escapeHtml(g.title)}" onerror="this.src='${CDN}/assets/images/hatopia.png'">
+      <span class="harto-guides-book-title">${escapeHtml(g.title)}</span>
+    </button>`;
+  }).join('');
+  shelf.querySelectorAll('.harto-guides-book-cover').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.guideId;
+      const guide = (window.__HARTO_GUIDES || []).find((g) => g.id === id);
+      if (guide) openGuide(guide);
+    });
+  });
+}
+
+function buildGuidePages(guide) {
+  const base = (p) => guideImageUrl(guide.id, p);
+  const pages = [];
+  const coverImg = base('cover.png');
+  pages.push({ html: `<div class="harto-guide-page harto-guide-cover"><img src="${coverImg}" alt="" class="harto-guide-cover-img" onerror="this.style.display='none'"><h3>${escapeHtml(guide.title)}</h3></div>`, density: 'hard' });
+  const tocItems = (guide.pages || []).map((p, i) => `<a href="#" class="harto-guide-toc-link" data-spread="${i + 1}">${escapeHtml(p.title)}</a>`).join('');
+  const tocImage = guide.tocImage ? base(guide.tocImage) : (guide.pages && guide.pages[0] ? base(guide.pages[0].image) : '');
+  const tocImageHtml = tocImage ? `<div class="harto-guide-toc-image"><img src="${tocImage}" alt="" onerror="this.style.display='none'"></div>` : '';
+  pages.push({ html: `<div class="harto-guide-page harto-guide-toc-page"><h4>Table of Contents</h4><div class="harto-guide-toc">${tocItems}</div>${tocImageHtml}</div>`, density: 'hard' });
+  (guide.pages || []).forEach((p) => {
+    pages.push({ html: `<div class="harto-guide-page"><h4>${escapeHtml(p.title)}</h4><p>${escapeHtml(p.text)}</p></div>`, density: 'hard' });
+    const imgUrl = base(p.image);
+    pages.push({
+      html: `<div class="harto-guide-page harto-guide-image"><img src="${imgUrl}" alt="${escapeHtml(p.imageAlt || '')}" data-zoomable onerror="this.style.display='none'"></div>`,
+      density: 'hard'
+    });
+  });
+  pages.push({ html: `<div class="harto-guide-page harto-guide-cover"><h3>${escapeHtml(guide.title)}</h3></div>`, density: 'hard' });
+  return pages;
+}
+
+let __guidePageFlip = null;
+
+function openGuide(guide) {
+  const shelf = document.getElementById('harto-guides-bookshelf');
+  const reader = document.getElementById('harto-guides-reader');
+  const bookEl = document.getElementById('harto-guides-book');
+  if (!shelf || !reader || !bookEl) return;
+  if (typeof St === 'undefined' || !St.PageFlip) {
+    shelf.innerHTML = '<p class="harto-placeholder">Page flip library failed to load.</p>';
+    return;
+  }
+  shelf.style.display = 'none';
+  reader.style.display = '';
+  bookEl.innerHTML = '';
+  const pageData = buildGuidePages(guide);
+  pageData.forEach((p) => {
+    const div = document.createElement('div');
+    div.className = 'harto-guide-stpage';
+    if (p.density === 'hard') div.setAttribute('data-density', 'hard');
+    div.innerHTML = p.html;
+    bookEl.appendChild(div);
+  });
+  const pageEls = bookEl.querySelectorAll('.harto-guide-stpage');
+  if (__guidePageFlip) __guidePageFlip.destroy();
+  __guidePageFlip = new St.PageFlip(bookEl, {
+    width: Math.min(400, window.innerWidth - 48),
+    height: 560,
+    flippingTime: 600,
+    drawShadow: true,
+    showCover: true,
+    useMouseEvents: true
+  });
+  __guidePageFlip.loadFromHTML(Array.from(pageEls));
+  pageEls.forEach((el) => {
+    el.querySelectorAll('.harto-guide-toc-link').forEach((a) => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        const spread = parseInt(a.dataset.spread, 10);
+        __guidePageFlip.turnToPage(spread * 2 + 1);
+      });
+    });
+    el.querySelectorAll('img[data-zoomable]').forEach((img) => {
+      img.addEventListener('click', () => openImageModal(img.src));
+    });
+  });
+}
+
+function openImageModal(src) {
+  const modal = document.getElementById('harto-guides-image-modal');
+  const img = document.getElementById('harto-guides-image-zoom');
+  if (!modal || !img) return;
+  img.src = src;
+  img.style.transform = 'scale(1)';
+  modal.setAttribute('aria-hidden', 'false');
+  modal.classList.add('harto-guides-image-modal-open');
+}
+
+function closeImageModal() {
+  const modal = document.getElementById('harto-guides-image-modal');
+  if (!modal) return;
+  modal.setAttribute('aria-hidden', 'true');
+  modal.classList.remove('harto-guides-image-modal-open');
+}
+
+function initGuides() {
+  const shelf = document.getElementById('harto-guides-bookshelf');
+  const reader = document.getElementById('harto-guides-reader');
+  const backBtn = document.getElementById('harto-guides-back');
+  const prevBtn = document.getElementById('harto-guides-prev');
+  const nextBtn = document.getElementById('harto-guides-next');
+  const tocBtn = document.getElementById('harto-guides-toc');
+  const coverBtn = document.getElementById('harto-guides-cover');
+  const guides = getVisibleGuides(window.__HARTO_GUIDES || []);
+  renderGuidesBookshelf(guides);
+  const closeBook = () => {
+    if (__guidePageFlip) {
+      __guidePageFlip.destroy();
+      __guidePageFlip = null;
+    }
+    const bookEl = document.getElementById('harto-guides-book');
+    if (bookEl) bookEl.innerHTML = '';
+    reader.style.display = 'none';
+    shelf.style.display = '';
+    requestAnimationFrame(() => {
+      renderGuidesBookshelf(getVisibleGuides(window.__HARTO_GUIDES || []));
+    });
+  };
+  backBtn?.addEventListener('click', closeBook);
+  coverBtn?.addEventListener('click', closeBook);
+  tocBtn?.addEventListener('click', () => __guidePageFlip?.turnToPage(1));
+  prevBtn?.addEventListener('click', () => __guidePageFlip?.flipPrev('bottom'));
+  nextBtn?.addEventListener('click', () => __guidePageFlip?.flipNext('bottom'));
+  const imgModal = document.getElementById('harto-guides-image-modal');
+  const imgZoom = document.getElementById('harto-guides-image-zoom');
+  imgModal?.querySelector('.harto-guides-image-backdrop')?.addEventListener('click', closeImageModal);
+  imgModal?.querySelector('.harto-guides-image-close')?.addEventListener('click', closeImageModal);
+  imgZoom?.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const s = parseFloat(imgZoom.style.transform.replace('scale(', '').replace(')', '')) || 1;
+    const delta = e.deltaY > 0 ? -0.2 : 0.2;
+    const next = Math.max(0.5, Math.min(3, s + delta));
+    imgZoom.style.transform = `scale(${next})`;
+  }, { passive: false });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeImageModal(); });
+}
+
 async function init() {
   await Promise.all([loadWeatherData(), loadTrackerData()]);
   const res = await fetch(`${CDN}/cards/data.json`);
@@ -1085,6 +1256,14 @@ async function init() {
   window.__HARTO_CARDS = [...builtIn, ...custom];
   applyResets(getCompletions());
   initCustomTasks();
+  try {
+    const guidesRes = await fetch(`${CDN}/info/guides.json`);
+    const guidesData = await guidesRes.json();
+    window.__HARTO_GUIDES = guidesData.guides || [];
+  } catch {
+    window.__HARTO_GUIDES = [];
+  }
+  initGuides();
   render();
   console.log(`Harto v${VERSION}`);
 }
@@ -1213,7 +1392,21 @@ function createShell() {
         <div id="harto-deck" class="harto-deck"></div>
       </div>
       <div id="harto-guides" class="harto-tab-panel">
-        <p class="harto-placeholder">Guides coming soon.</p>
+        <div id="harto-guides-bookshelf" class="harto-guides-bookshelf"></div>
+        <div id="harto-guides-reader" class="harto-guides-reader" style="display:none">
+          <div class="harto-guides-reader-header">
+            <button id="harto-guides-back" class="harto-guides-back">← Back to shelf</button>
+            <div class="harto-guides-quick-nav">
+              <button id="harto-guides-toc" class="harto-guides-quick-btn" title="Table of contents">TOC</button>
+              <button id="harto-guides-cover" class="harto-guides-quick-btn" title="Close book">Cover</button>
+            </div>
+          </div>
+          <div id="harto-guides-book" class="harto-guides-book"></div>
+          <div class="harto-guides-reader-controls">
+            <button id="harto-guides-prev" class="harto-btn-secondary">Prev</button>
+            <button id="harto-guides-next" class="harto-btn-secondary">Next</button>
+          </div>
+        </div>
       </div>
     </div>
     <div id="harto-custom-modal" class="harto-custom-modal" aria-hidden="true">
@@ -1261,6 +1454,14 @@ function createShell() {
         </div>
       </div>
     </div>
+    <div id="harto-reminder-toasts" class="harto-reminder-toasts" aria-live="polite"></div>
+    <div id="harto-guides-image-modal" class="harto-guides-image-modal" aria-hidden="true">
+      <div class="harto-guides-image-backdrop"></div>
+      <div class="harto-guides-image-content">
+        <button class="harto-guides-image-close" aria-label="Close">×</button>
+        <img id="harto-guides-image-zoom" src="" alt="">
+      </div>
+    </div>
   `;
 }
 
@@ -1298,6 +1499,7 @@ async function initClock() {
       $img.src = imgSrc;
       $img.alt = label;
     }
+    updateReminderToasts();
   }
 
   updateClock();
@@ -1382,6 +1584,48 @@ function parseVersionFromCss(text) {
 
 function buildVersionReport(jsVer, cssVer) {
   return `main.js: ${jsVer}\nmain.css: ${cssVer}`;
+}
+
+const SPECIAL_WEATHER = ['meteor', 'rain', 'rainbow', 'aurora'];
+
+function updateReminderToasts() {
+  const container = document.getElementById('harto-reminder-toasts');
+  if (!container) return;
+  const cards = window.__HARTO_CARDS || [];
+  const completions = getCompletions();
+  const currentWeather = getCurrentWeatherBySlot(getTimeSlot());
+  const mergeWindow = isWeeklyMergeWindow();
+  const packs = PACKS.slice(1);
+
+  const toasts = [];
+
+  if (SPECIAL_WEATHER.includes(currentWeather)) {
+    const hasIncompleteSpecialWeatherTask = cards.some((c) => {
+      if (!cardVisible(c)) return false;
+      if (c.custom && c.active === false) return false;
+      if (isCompleted(c.id, completions)) return false;
+      if (!packs.includes(c.pack)) return false;
+      return c.weather && c.weather !== 'any' && c.weather === currentWeather;
+    });
+    if (hasIncompleteSpecialWeatherTask) {
+      const weatherLabel = { meteor: 'meteor', rain: 'rain', rainbow: 'rainbow', aurora: 'aurora' }[currentWeather] || currentWeather;
+      toasts.push({ type: 'weather', key: 'weather', msg: `Hey there's a ${weatherLabel} now. Don't forget to complete your tasks.` });
+    }
+  }
+
+  cards.forEach((c) => {
+    if (!cardVisible(c)) return;
+    if (c.custom && c.active === false) return;
+    if (isCompleted(c.id, completions)) return;
+    if (!packs.includes(c.pack)) return;
+    const isLastDay = (c.timeLimited && isExpiryDay(c)) || (c.pack === 'Weekly' && mergeWindow);
+    if (isLastDay) {
+      toasts.push({ type: 'lastday', key: c.id, msg: `Hey today is the last day for ${escapeHtml(c.title)} task. Don't forget to complete it.` });
+    }
+  });
+
+  container.innerHTML = toasts.map((t) => `<div class="harto-reminder-toast" data-toast-key="${escapeHtml(t.key)}" data-toast-type="${escapeHtml(t.type)}">${t.msg}</div>`).join('');
+  container.classList.toggle('harto-reminder-toasts-empty', toasts.length === 0);
 }
 
 function initVersionToast() {

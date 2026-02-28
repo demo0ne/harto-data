@@ -1,0 +1,39 @@
+{
+  "guides": [
+    {
+      "id": "heartopia-basics",
+      "title": "Heartopia Guide",
+      "active": true,
+      "timeLimited": false,
+      "expiryDate": null,
+      "tocImage": "image1.png",
+      "pages": [
+        {
+          "title": "Getting Started",
+          "text": "Welcome to Heartopia! Use the task cards to track your daily activities. Complete tasks to move them to your completed pack.",
+          "image": "image1.png"
+        },
+        {
+          "title": "Daily Tasks",
+          "text": "Daily tasks reset each day. Check off each one as you complete them. Use the pack view to see your progress.",
+          "image": "image2.png"
+        }
+      ]
+    },
+    {
+      "id": "flower-guide",
+      "title": "Flower Guide",
+      "active": true,
+      "timeLimited": false,
+      "expiryDate": null,
+      "tocImage": "image1.png",
+      "pages": [
+        {
+          "title": "page 1 test title",
+          "text": "",
+          "image": "image1.png"
+        }
+      ]
+    }
+  ]
+}
