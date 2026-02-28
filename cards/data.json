@@ -272,6 +272,20 @@
       "time": "all",
       "active": true,
       "steps": 2
+    },
+    {
+      "id": "winter-weekly",
+      "pack": "Others",
+      "title": "❄️ Weekly",
+      "description": "",
+      "image": "assets/images/placeholder.png",
+      "season": "winter",
+      "weather": "any",
+      "time": "all",
+      "active": true,
+      "timeLimited": false,
+      "expiryDate": "",
+      "steps": 10
     }
   ]
 }

@@ -1,5 +1,5 @@
 /* Harto - Card-based To-Do for Heartopia */
-/* Version: 0.7.5 */
+/* Version: 0.7.6 */
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
 
@@ -959,6 +959,38 @@ html:not([data-theme="dark"]) .harto-topbar {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid var(--border);
   position: relative;
+}
+
+.harto-card[draggable="true"] {
+  cursor: grab;
+}
+
+.harto-card[draggable="true"]:active {
+  cursor: grabbing;
+}
+
+.harto-card.harto-card-dragging {
+  opacity: 0.6;
+}
+
+.harto-card.harto-card-drag-over {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.harto-card-drag-handle {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  letter-spacing: -0.1em;
+  cursor: grab;
+  opacity: 0.6;
+  z-index: 2;
+}
+
+.harto-card-drag-handle:hover {
+  opacity: 1;
 }
 
 .harto-card-content {

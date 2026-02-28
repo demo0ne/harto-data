@@ -1,16 +1,17 @@
 /**
  * Harto - Card-based To-Do for Heartopia
- * Version: 0.8.0
+ * Version: 0.8.1
  */
 
 const CDN = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
-const VERSION = '0.8.0';
+const VERSION = '0.8.1';
 if (typeof window !== 'undefined') window.__HARTO_VERSION_JS = VERSION;
 const STORAGE_COMPLETIONS = 'harto_completions';
 const STORAGE_COMPLETIONS_TW = 'harto_completions_tw';
 const STORAGE_THEME = 'harto_theme';
 const STORAGE_SETUP = 'harto_setup';
 const STORAGE_TASK_VIEW = 'harto_task_view';
+const STORAGE_PENDING_ORDER = 'harto_pending_order';
 // harto_admin: read-only from app; set manually in browser localStorage to 'true' for admin mode
 
 function isAdmin() {
@@ -29,6 +30,34 @@ function getTaskView() {
 
 function setTaskView(view) {
   localStorage.setItem(STORAGE_TASK_VIEW, view === 'list' ? 'list' : 'card');
+}
+
+function getPendingOrder() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_PENDING_ORDER) || '{}');
+  } catch {
+    return {};
+  }
+}
+
+function setPendingOrder(order) {
+  localStorage.setItem(STORAGE_PENDING_ORDER, JSON.stringify(order));
+}
+
+function sortByPendingOrder(cards, displayPack) {
+  const order = getPendingOrder()[displayPack];
+  if (!order || !Array.isArray(order)) return cards;
+  const byId = new Map(cards.map((c) => [c.id, c]));
+  const result = [];
+  for (const id of order) {
+    const c = byId.get(id);
+    if (c) {
+      result.push(c);
+      byId.delete(id);
+    }
+  }
+  byId.forEach((c) => result.push(c));
+  return result;
 }
 
 function getStorageCompletions() {
@@ -323,6 +352,8 @@ function uncompleteCard(cardId, opts) {
 
 function renderCard(card, completions, done, index, opts) {
   const weeklyMerge = (opts?.mergeWindow && card.pack === 'Weekly') || opts?.expiryDay;
+  const draggable = opts?.draggable && !done;
+  const displayPack = opts?.displayPack || card.pack;
   const imgSrc = card.image ? (card.image.startsWith('http') ? card.image : `${CDN}/${card.image}`) : '';
   const approvedUrl = `${CDN}/assets/images/approved.png`;
   const steps = card.steps || 0;
@@ -356,8 +387,12 @@ function renderCard(card, completions, done, index, opts) {
     <span class="harto-card-meta-badge" data-meta="time"><span class="harto-card-meta-label">Time:</span> ${escapeHtml(time)}</span>
   </div>`;
   const weeklyMergeClass = weeklyMerge ? ' harto-card-weekly-merge' : '';
+  const draggableAttr = draggable ? ' draggable="true"' : '';
+  const displayPackAttr = draggable ? ` data-display-pack="${escapeHtml(displayPack)}"` : '';
+  const dragHandle = draggable ? '<span class="harto-card-drag-handle" title="Drag to reorder">⋮⋮</span>' : '';
   return `
-    <div class="harto-card harto-card-dealing ${done ? 'harto-card-completed' : ''}${weeklyMergeClass}" data-id="${escapeHtml(card.id)}" data-pack="${escapeHtml(card.pack)}" data-deal-index="${index >= 0 ? index : 0}">
+    <div class="harto-card harto-card-dealing ${done ? 'harto-card-completed' : ''}${weeklyMergeClass}"${draggableAttr}${displayPackAttr} data-id="${escapeHtml(card.id)}" data-pack="${escapeHtml(card.pack)}" data-deal-index="${index >= 0 ? index : 0}">
+      ${dragHandle}
       <div class="harto-card-content">
         <div class="harto-card-left">
           <span class="harto-card-complete-wrap">${completeBtn}</span>
@@ -548,6 +583,63 @@ function isExpiryDay(card) {
   return getToday() === card.expiryDate.trim();
 }
 
+function initPendingDrag(deckEl) {
+  let dragCardId = null;
+  let dragDisplayPack = null;
+
+  deckEl.querySelectorAll('.harto-card[draggable="true"]').forEach((cardEl) => {
+    cardEl.addEventListener('dragstart', (e) => {
+      dragCardId = cardEl.dataset.id;
+      dragDisplayPack = cardEl.dataset.displayPack || cardEl.closest('.harto-deck-section')?.dataset?.pack;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', dragCardId);
+      e.dataTransfer.setData('application/json', JSON.stringify({ id: dragCardId, pack: dragDisplayPack }));
+      const rect = cardEl.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      e.dataTransfer.setDragImage(cardEl, x, y);
+      cardEl.classList.add('harto-card-dragging');
+    });
+    cardEl.addEventListener('dragend', () => {
+      cardEl.classList.remove('harto-card-dragging');
+      deckEl.querySelectorAll('.harto-card-drag-over').forEach((el) => el.classList.remove('harto-card-drag-over'));
+      dragCardId = null;
+      dragDisplayPack = null;
+    });
+    cardEl.addEventListener('dragover', (e) => {
+      if (!dragCardId || dragCardId === cardEl.dataset.id) return;
+      if ((cardEl.dataset.displayPack || cardEl.closest('.harto-deck-section')?.dataset?.pack) !== dragDisplayPack) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      cardEl.classList.add('harto-card-drag-over');
+    });
+    cardEl.addEventListener('dragleave', () => {
+      cardEl.classList.remove('harto-card-drag-over');
+    });
+    cardEl.addEventListener('drop', (e) => {
+      e.preventDefault();
+      cardEl.classList.remove('harto-card-drag-over');
+      const targetId = cardEl.dataset.id;
+      const pack = cardEl.dataset.displayPack || cardEl.closest('.harto-deck-section')?.dataset?.pack;
+      if (!pack || dragCardId === targetId || pack !== dragDisplayPack) return;
+      const section = cardEl.closest('.harto-deck-section');
+      if (!section) return;
+      const cards = Array.from(section.querySelectorAll('.harto-card:not(.harto-card-completed)'));
+      const ids = cards.map((c) => c.dataset.id);
+      const fromIdx = ids.indexOf(dragCardId);
+      const toIdx = ids.indexOf(targetId);
+      if (fromIdx < 0 || toIdx < 0) return;
+      ids.splice(fromIdx, 1);
+      const newToIdx = fromIdx < toIdx ? toIdx - 1 : toIdx;
+      ids.splice(newToIdx, 0, dragCardId);
+      const order = getPendingOrder();
+      order[pack] = ids;
+      setPendingOrder(order);
+      render();
+    });
+  });
+}
+
 function cardVisible(card) {
   if (card.active === false) return false;
   if (isTimeLimitedExpired(card)) return false;
@@ -600,12 +692,12 @@ function render(opts) {
   const packsToShow = filterPack === 'All' ? PACKS.slice(1) : [filterPack];
   const packExpanded = window.__HARTO_PACK_EXPANDED || {};
   deckEl.innerHTML = packsToShow.map((pack) => {
-    const incomplete = byPack.incomplete[pack] || [];
+    const incomplete = sortByPendingOrder(byPack.incomplete[pack] || [], pack);
     const completed = byPack.completed[pack] || [];
     if (incomplete.length === 0 && completed.length === 0) return '';
     let packHtml = renderPack(pack, completed.length > 0, completed.length, !!packExpanded[pack]);
     if (incomplete.length > 0) packHtml = `<span class="harto-card-divider-wrap">${packHtml}</span>`;
-    const incompleteHtml = incomplete.map((c, i) => renderCard(c, completions, false, i, { mergeWindow, expiryDay: isExpiryDay(c) })).join('');
+    const incompleteHtml = incomplete.map((c, i) => renderCard(c, completions, false, i, { mergeWindow, expiryDay: isExpiryDay(c), displayPack: pack, draggable: true })).join('');
     const completedCards = completed.map((c, i) => renderCard(c, completions, true, incomplete.length + 1 + i, { mergeWindow, expiryDay: isExpiryDay(c) }));
     const completedWrapperClass = packExpanded[pack] ? 'harto-deck-completed-visible' : '';
     const completedInner = completedCards.join('');
@@ -639,6 +731,8 @@ function render(opts) {
     const runDeal = () => playDealAnimation(deckEl);
     isPackToggle ? setTimeout(runDeal, 50) : runDeal();
   }
+
+  initPendingDrag(deckEl);
 
   deckEl.querySelectorAll('.harto-card-complete').forEach((btn) => {
     btn.addEventListener('click', (e) => {
