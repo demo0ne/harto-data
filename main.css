@@ -1,5 +1,5 @@
 /* Harto - Card-based To-Do for Heartopia */
-/* Version: 0.7.4 */
+/* Version: 0.7.5 */
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
 
@@ -788,6 +788,22 @@ html:not([data-theme="dark"]) .harto-topbar {
   box-shadow: var(--card-shadow-hover);
 }
 
+.harto-deck-view-list .harto-card-weekly-merge {
+  box-shadow: var(--card-shadow), 0 0 20px var(--accent-glow), 0 0 40px rgba(124, 92, 255, 0.25);
+}
+
+.harto-deck-view-list .harto-card-weekly-merge:hover {
+  box-shadow: var(--card-shadow-hover), 0 0 24px var(--accent-glow), 0 0 50px rgba(124, 92, 255, 0.35);
+}
+
+[data-setup="TW"] .harto-deck-view-list .harto-card-weekly-merge {
+  box-shadow: var(--card-shadow), 0 0 20px rgba(236, 72, 153, 0.4), 0 0 40px rgba(219, 39, 119, 0.3);
+}
+
+[data-setup="TW"] .harto-deck-view-list .harto-card-weekly-merge:hover {
+  box-shadow: var(--card-shadow-hover), 0 0 24px rgba(236, 72, 153, 0.5), 0 0 50px rgba(219, 39, 119, 0.35);
+}
+
 .harto-deck-view-list .harto-deck-pack {
   width: 100%;
   max-width: 100%;
@@ -1033,6 +1049,39 @@ html:not([data-theme="dark"]) .harto-topbar {
 .harto-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--card-shadow-hover);
+}
+
+/* Weekly merge window: bright glow when weekly tasks show in Daily */
+.harto-card-weekly-merge {
+  box-shadow: var(--card-shadow), 0 0 20px var(--accent-glow), 0 0 40px rgba(124, 92, 255, 0.25);
+}
+
+.harto-card-weekly-merge:hover {
+  box-shadow: var(--card-shadow-hover), 0 0 24px var(--accent-glow), 0 0 50px rgba(124, 92, 255, 0.35);
+}
+
+[data-setup="TW"] .harto-card-weekly-merge {
+  box-shadow: var(--card-shadow), 0 0 20px rgba(236, 72, 153, 0.4), 0 0 40px rgba(219, 39, 119, 0.3);
+}
+
+[data-setup="TW"] .harto-card-weekly-merge:hover {
+  box-shadow: var(--card-shadow-hover), 0 0 24px rgba(236, 72, 153, 0.5), 0 0 50px rgba(219, 39, 119, 0.35);
+}
+
+[data-theme="dark"] .harto-card-weekly-merge {
+  box-shadow: var(--card-shadow), 0 0 24px var(--accent-glow), 0 0 48px rgba(167, 139, 250, 0.3);
+}
+
+[data-theme="dark"] .harto-card-weekly-merge:hover {
+  box-shadow: var(--card-shadow-hover), 0 0 28px var(--accent-glow), 0 0 56px rgba(167, 139, 250, 0.4);
+}
+
+[data-setup="TW"][data-theme="dark"] .harto-card-weekly-merge {
+  box-shadow: var(--card-shadow), 0 0 24px rgba(236, 72, 153, 0.45), 0 0 48px rgba(249, 168, 212, 0.25);
+}
+
+[data-setup="TW"][data-theme="dark"] .harto-card-weekly-merge:hover {
+  box-shadow: var(--card-shadow-hover), 0 0 28px rgba(236, 72, 153, 0.55), 0 0 56px rgba(249, 168, 212, 0.3);
 }
 
 .harto-card-title-row {

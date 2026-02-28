@@ -236,6 +236,18 @@
       "time": "all",
       "active": true,
       "steps": 0
+    },
+    {
+      "id": "-weekly-goals",
+      "pack": "Weekly",
+      "title": "📆 Weekly Goals",
+      "description": "Not sure if there is a variation of this. But, normally, just complete any 2 personal goals.",
+      "image": "assets/images/placeholder.png",
+      "season": "always",
+      "weather": "any",
+      "time": "all",
+      "active": true,
+      "steps": 2
     }
   ]
 }

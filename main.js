@@ -1,10 +1,10 @@
 /**
  * Harto - Card-based To-Do for Heartopia
- * Version: 0.7.7
+ * Version: 0.7.8
  */
 
 const CDN = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : 'https://cdn.jsdelivr.net/gh/demo0ne/harto-data@main';
-const VERSION = '0.7.7';
+const VERSION = '0.7.8';
 if (typeof window !== 'undefined') window.__HARTO_VERSION_JS = VERSION;
 const STORAGE_COMPLETIONS = 'harto_completions';
 const STORAGE_COMPLETIONS_TW = 'harto_completions_tw';
@@ -72,6 +72,14 @@ function getWeekStart() {
     : (day + 1); // Sun->1, Mon->2, ..., Fri->6
   d.setDate(d.getDate() - daysToSat);
   return formatDate(d);
+}
+
+function isWeeklyMergeWindow() {
+  const hr = getResetHour();
+  const now = new Date();
+  const day = now.getDay();
+  const hrs = now.getHours();
+  return (day === 5 && hrs >= hr) || (day === 6 && hrs < hr);
 }
 
 function getCompletions() {
@@ -313,7 +321,8 @@ function uncompleteCard(cardId, opts) {
   }
 }
 
-function renderCard(card, completions, done, index) {
+function renderCard(card, completions, done, index, opts) {
+  const weeklyMerge = (opts?.mergeWindow && card.pack === 'Weekly');
   const imgSrc = card.image ? (card.image.startsWith('http') ? card.image : `${CDN}/${card.image}`) : '';
   const approvedUrl = `${CDN}/assets/images/approved.png`;
   const steps = card.steps || 0;
@@ -346,8 +355,9 @@ function renderCard(card, completions, done, index) {
     <span class="harto-card-meta-badge" data-meta="weather"><span class="harto-card-meta-label">Weather:</span> ${escapeHtml(weather)}</span>
     <span class="harto-card-meta-badge" data-meta="time"><span class="harto-card-meta-label">Time:</span> ${escapeHtml(time)}</span>
   </div>`;
+  const weeklyMergeClass = weeklyMerge ? ' harto-card-weekly-merge' : '';
   return `
-    <div class="harto-card harto-card-dealing ${done ? 'harto-card-completed' : ''}" data-id="${escapeHtml(card.id)}" data-pack="${escapeHtml(card.pack)}" data-deal-index="${index >= 0 ? index : 0}">
+    <div class="harto-card harto-card-dealing ${done ? 'harto-card-completed' : ''}${weeklyMergeClass}" data-id="${escapeHtml(card.id)}" data-pack="${escapeHtml(card.pack)}" data-deal-index="${index >= 0 ? index : 0}">
       <div class="harto-card-content">
         <div class="harto-card-left">
           <span class="harto-card-complete-wrap">${completeBtn}</span>
@@ -549,13 +559,15 @@ function render(opts) {
 
   const byPack = { incomplete: {}, completed: {} };
   PACKS.slice(1).forEach((p) => { byPack.incomplete[p] = []; byPack.completed[p] = []; });
+  const mergeWindow = isWeeklyMergeWindow();
   let pendingCount = 0;
   cards.forEach((c) => {
     if (!cardVisible(c)) return;
     if (!byPack.incomplete[c.pack]) return;
     const done = isCompleted(c.id, completions);
     if (!done) pendingCount++;
-    (done ? byPack.completed : byPack.incomplete)[c.pack].push(c);
+    const displayPack = mergeWindow && c.pack === 'Weekly' ? 'Daily' : c.pack;
+    (done ? byPack.completed : byPack.incomplete)[displayPack].push(c);
   });
 
   const tasksTab = document.querySelector('.harto-tab[data-tab="tasks"]');
@@ -579,8 +591,8 @@ function render(opts) {
     if (incomplete.length === 0 && completed.length === 0) return '';
     let packHtml = renderPack(pack, completed.length > 0, completed.length, !!packExpanded[pack]);
     if (incomplete.length > 0) packHtml = `<span class="harto-card-divider-wrap">${packHtml}</span>`;
-    const incompleteHtml = incomplete.map((c, i) => renderCard(c, completions, false, i)).join('');
-    const completedCards = completed.map((c, i) => renderCard(c, completions, true, incomplete.length + 1 + i));
+    const incompleteHtml = incomplete.map((c, i) => renderCard(c, completions, false, i, { mergeWindow })).join('');
+    const completedCards = completed.map((c, i) => renderCard(c, completions, true, incomplete.length + 1 + i, { mergeWindow }));
     const completedWrapperClass = packExpanded[pack] ? 'harto-deck-completed-visible' : '';
     const completedInner = completedCards.join('');
     const completedHtml = completedCards.length > 0
