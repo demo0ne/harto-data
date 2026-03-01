@@ -84,6 +84,61 @@
           "image": "pink_bubble_location_guide_20260228.png"
         }
       ]
+    },
+    {
+      "id": "animals",
+      "title": "Animals",
+      "active": true,
+      "timeLimited": false,
+      "expiryDate": null,
+      "tocImage": "",
+      "pages": [
+        {
+          "title": "🐇 Bunnies",
+          "text": "🌿 Weeds\n🍓 Strawberry\n🥕 Carrot",
+          "image": ""
+        },
+        {
+          "title": "🦙 Alpaca",
+          "text": "🔵 Blueberries\n🍍 Pineapple\n🌾 Wheat",
+          "image": ""
+        },
+        {
+          "title": "🐼 Panda",
+          "text": "🎍 Bamboo\n🌽 Corn\n🍎 Apple",
+          "image": ""
+        },
+        {
+          "title": "🦊 Fox",
+          "text": "🐟 European Perch\n🐠 Largemouth Bass\n🥩 Meat",
+          "image": ""
+        },
+        {
+          "title": "🦭 Sea Otter",
+          "text": "🍤 Common Shrimp\n🦐 Oriental Shrimp\n🐚 Mussels",
+          "image": ""
+        },
+        {
+          "title": "🦫 Capybara",
+          "text": "🍒 Raspberry\n🍇 Grape\n🍅 Tomato",
+          "image": ""
+        },
+        {
+          "title": "🦌 Deer",
+          "text": "🪵 Branches\n🥗 House Salad\n🥬 Lettuce",
+          "image": ""
+        },
+        {
+          "title": "🦡 Ferret",
+          "text": "🐠 Goby\n🐟 Sea Bass\n🥚 Egg",
+          "image": ""
+        },
+        {
+          "title": "🐧 Penguin  ❄️",
+          "text": "🐟 Sardine\n🦐 Common Prawn\n🐟 False Scad",
+          "image": ""
+        }
+      ]
     }
   ]
 }
