@@ -69,6 +69,21 @@
           "image": "08_highland_poppy.jpg"
         }
       ]
+    },
+    {
+      "id": "pink-bubbles",
+      "title": "Pink Bubbles",
+      "active": true,
+      "timeLimited": false,
+      "expiryDate": null,
+      "tocImage": "pink_bubble_location_guide_20260228.png",
+      "pages": [
+        {
+          "title": "2026-02-28 to 2026-03-06",
+          "text": "",
+          "image": "pink_bubble_location_guide_20260228.png"
+        }
+      ]
     }
   ]
 }

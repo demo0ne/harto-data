@@ -699,9 +699,7 @@ function cardVisible(card) {
   const slot = getTimeSlot();
   const weather = getCurrentWeatherBySlot(slot);
   if (card.season && card.season !== 'always' && card.season !== season) return false;
-  if (card.weather && card.weather !== 'any') {
-    if (!SPECIAL_WEATHER.includes(card.weather) && card.weather !== weather) return false;
-  }
+  if (card.weather && card.weather !== 'any' && card.weather !== weather) return false;
   if (card.time && card.time !== 'all' && card.time !== slot) return false;
   return true;
 }
