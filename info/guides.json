@@ -29,9 +29,44 @@
       "tocImage": "image1.png",
       "pages": [
         {
-          "title": "page 1 test title",
-          "text": "",
-          "image": "image1.png"
+          "title": "Laceleaf",
+          "text": "Laceleaf flower breeding guide",
+          "image": "01_laceleaf.jpg"
+        },
+        {
+          "title": "Corn Poppy",
+          "text": "Corn poppy breeding guide",
+          "image": "02_corn_poppy.jpg"
+        },
+        {
+          "title": "Daisy",
+          "text": "Daisy flower breeding guide",
+          "image": "03_daisy.jpg"
+        },
+        {
+          "title": "Pansy",
+          "text": "Pansy breeding guide",
+          "image": "04_pansy.jpg"
+        },
+        {
+          "title": "Calla Lily",
+          "text": "Calla Lily breeding guide",
+          "image": "05_calla_lily.jpg"
+        },
+        {
+          "title": "Morning Glory",
+          "text": "Morning Glory breeding guide",
+          "image": "06_morning_glory.jpg"
+        },
+        {
+          "title": "Carnation",
+          "text": "Carnation breeding guide",
+          "image": "07_carnation.jpg"
+        },
+        {
+          "title": "❄️ Highland Poppy",
+          "text": "Winterfrost Event:  Highland poppy breeding guide",
+          "image": "08_highland_poppy.jpg"
         }
       ]
     }

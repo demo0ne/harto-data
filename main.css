@@ -1,5 +1,5 @@
 /* Harto - Card-based To-Do for Heartopia */
-/* Version: 0.9.5 */
+/* Version: 0.11.7 */
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Fredoka:wght@400;500;600&display=swap');
 
@@ -1478,6 +1478,12 @@ html:not([data-theme="dark"]) .harto-topbar {
   font-weight: 600;
   font-size: 0.9rem;
   margin: 0;
+}
+
+.harto-card-title-time {
+  font-weight: 400;
+  font-size: 0.8em;
+  color: var(--text-muted);
   padding: 0;
   line-height: 1.3;
 }
@@ -1644,8 +1650,8 @@ html:not([data-theme="dark"]) .harto-topbar {
   justify-content: center;
   flex-wrap: wrap;
   margin-top: 0.5rem;
-  position: relative;
-  z-index: 2;
+  margin-bottom: 0;
+  flex-shrink: 0;
 }
 
 .harto-card-step {
@@ -1866,8 +1872,158 @@ html:not([data-theme="dark"]) .harto-topbar {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
+/* Guides – toolbar & view toggle */
+.harto-guides-toolbar {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem 1rem 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1rem;
+}
+
+.harto-guides-view-btn {
+  padding: 0.4rem 1rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.harto-guides-view-btn:hover {
+  color: var(--text);
+}
+
+.harto-guides-view-btn.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Guides – gallery (shelf-like, expand on click) */
+.harto-guides-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  padding: 2rem 1rem;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.harto-guides-gallery-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.harto-guides-gallery-cover {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 140px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 8px;
+  position: relative;
+}
+
+.harto-guides-gallery-cover:hover {
+  opacity: 0.9;
+}
+
+.harto-guides-gallery-cover img {
+  width: 120px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.harto-guides-gallery-cover-title {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+  text-align: center;
+  line-height: 1.3;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.harto-guides-gallery-cover-icon {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.harto-guides-gallery-group-collapsed .harto-guides-gallery-grid {
+  display: none;
+}
+
+.harto-guides-gallery-has-expanded .harto-guides-gallery-group:not(.harto-guides-gallery-group-expanded) {
+  display: none;
+}
+
+.harto-guides-gallery-group:not(.harto-guides-gallery-group-collapsed) {
+  width: 100%;
+  max-width: 100%;
+}
+
+.harto-guides-gallery-group:not(.harto-guides-gallery-group-collapsed) .harto-guides-gallery-cover-icon {
+  transform: rotate(-90deg);
+}
+
+.harto-guides-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+  width: 100%;
+  max-width: 900px;
+  padding: 1rem 0;
+  border-top: 1px solid var(--border);
+  margin-top: 0.5rem;
+}
+
+.harto-guides-gallery-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.harto-guides-gallery-item img {
+  width: 100%;
+  aspect-ratio: 3/4;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.harto-guides-gallery-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
 /* Guides – bookshelf */
 .harto-guides-bookshelf {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-wrap: wrap;
   gap: 1.5rem;
@@ -2000,14 +2156,33 @@ html:not([data-theme="dark"]) .harto-topbar {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   min-height: 100%;
-  gap: 0.5rem;
+  gap: 1rem;
+  padding-top: 1rem;
+}
+
+.harto-guide-cover .harto-guide-cover-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
+  text-align: center;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.harto-guide-cover-img-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  width: 100%;
 }
 
 .harto-guide-cover-img {
-  max-width: 80%;
-  max-height: 60%;
+  max-width: 95%;
+  max-height: 85%;
   object-fit: contain;
 }
 
@@ -2044,6 +2219,13 @@ html:not([data-theme="dark"]) .harto-topbar {
   color: var(--accent);
   text-decoration: none;
   cursor: pointer;
+}
+
+.harto-guide-toc-num,
+.harto-guide-page-num {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+  margin-right: 0.35em;
 }
 
 .harto-guide-image {
