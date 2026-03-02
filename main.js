@@ -1,11 +1,11 @@
 /**
  * Harto - Card-based To-Do for Heartopia
- * Version: 0.11.9
+ * Version: 0.12.0
  */
 
 const HARTO_RAW = 'https://raw.githubusercontent.com/demo0ne/harto-data/main';
 const CDN = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : HARTO_RAW;
-const VERSION = '0.11.9';
+const VERSION = '0.12.0';
 if (typeof window !== 'undefined') window.__HARTO_VERSION_JS = VERSION;
 const STORAGE_COMPLETIONS = 'harto_completions';
 const STORAGE_COMPLETIONS_TW = 'harto_completions_tw';
@@ -15,6 +15,7 @@ const STORAGE_TASK_VIEW = 'harto_task_view';
 const STORAGE_PENDING_ORDER = 'harto_pending_order';
 const STORAGE_CUSTOM_CARDS = 'harto_custom_cards';
 const STORAGE_SHOW_INACTIVE = 'harto_show_inactive';
+const STORAGE_HIDDEN_BUILTIN = 'harto_hidden_builtin';
 // harto_admin: read-only from app; set manually in browser localStorage to 'true' for admin mode
 
 function isAdmin() {
@@ -384,6 +385,12 @@ function renderCard(card, completions, done, index, opts) {
   }
   const isCustom = opts?.isCustom;
   const isInactiveCustom = opts?.isInactiveCustom;
+  const isHiddenBuiltin = opts?.isHiddenBuiltin;
+  const eyeSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+  const eyeSlashSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
+  const builtinHideBtn = !isCustom
+    ? `<button type="button" class="harto-builtin-hide-btn" data-card-id="${escapeHtml(card.id)}" data-hidden="${isHiddenBuiltin ? 'true' : 'false'}" title="${isHiddenBuiltin ? 'Unhide' : 'Hide'}" aria-label="${isHiddenBuiltin ? 'Unhide task' : 'Hide task'}">${isHiddenBuiltin ? eyeSlashSvg : eyeSvg}</button>`
+    : '';
   let completeBtn;
   if (isInactiveCustom) {
     completeBtn = `<button class="harto-card-reactivate" data-action="reactivate" title="Reactivate">↻</button>`;
@@ -428,12 +435,13 @@ function renderCard(card, completions, done, index, opts) {
   const weeklyMergeClass = weeklyMerge ? ' harto-card-weekly-merge' : '';
   const customClass = isCustom ? ' harto-card-custom' : '';
   const inactiveCustomClass = isInactiveCustom ? ' harto-card-inactive-custom' : '';
+  const hiddenBuiltinClass = isHiddenBuiltin ? ' harto-card-hidden-builtin' : '';
   const draggableAttr = draggable ? ' draggable="true"' : '';
   const displayPackAttr = draggable ? ` data-display-pack="${escapeHtml(displayPack)}"` : '';
   const dragHandle = draggable ? '<span class="harto-card-drag-handle" title="Drag to reorder">⋮⋮</span>' : '';
   const customIndicator = isCustom ? '<span class="harto-card-custom-indicator" aria-hidden="true"></span>' : '';
   return `
-    <div class="harto-card harto-card-dealing ${done ? 'harto-card-completed' : ''}${weeklyMergeClass}${customClass}${inactiveCustomClass}"${draggableAttr}${displayPackAttr} data-id="${escapeHtml(card.id)}" data-pack="${escapeHtml(card.pack)}" data-deal-index="${index >= 0 ? index : 0}">
+    <div class="harto-card harto-card-dealing ${done ? 'harto-card-completed' : ''}${weeklyMergeClass}${customClass}${inactiveCustomClass}${hiddenBuiltinClass}"${draggableAttr}${displayPackAttr} data-id="${escapeHtml(card.id)}" data-pack="${escapeHtml(card.pack)}" data-deal-index="${index >= 0 ? index : 0}">
       ${customIndicator}${dragHandle}
       <div class="harto-card-content">
         <div class="harto-card-left">
@@ -451,7 +459,7 @@ function renderCard(card, completions, done, index, opts) {
           ${giftCodeHtml}
           ${metaBadges}
           ${customActionsBody}
-          ${isStepCard ? stepsHtml : ''}
+          ${(isStepCard || builtinHideBtn) ? `<div class="harto-card-footer">${isStepCard ? stepsHtml : ''}${builtinHideBtn}</div>` : ''}
           </div>
         </div>
       </div>
@@ -699,10 +707,30 @@ function setShowInactive(value) {
   localStorage.setItem(STORAGE_SHOW_INACTIVE, value ? 'true' : '');
 }
 
+function getHiddenBuiltinIds() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_HIDDEN_BUILTIN) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function toggleHiddenBuiltin(id) {
+  const ids = getHiddenBuiltinIds();
+  const idx = ids.indexOf(id);
+  if (idx >= 0) ids.splice(idx, 1);
+  else ids.push(id);
+  localStorage.setItem(STORAGE_HIDDEN_BUILTIN, JSON.stringify(ids));
+}
+
 const SPECIAL_WEATHER = ['meteor', 'rain', 'rainbow', 'aurora'];
 
 function cardVisible(card) {
   const showInactive = getShowInactive();
+  if (!card.custom && getHiddenBuiltinIds().includes(card.id)) {
+    if (showInactive) return true;
+    return false;
+  }
   if (card.active === false) {
     if (card.custom && showInactive) return true;
     return false;
@@ -743,8 +771,9 @@ function render(opts) {
     if (!cardVisible(c)) return;
     if (!byPack.incomplete[c.pack]) return;
     const isInactiveCustom = c.custom && c.active === false;
-    const done = isInactiveCustom ? false : isCompleted(c.id, completions);
-    if (!done && !isInactiveCustom) pendingCount++;
+    const isHiddenBuiltin = !c.custom && getHiddenBuiltinIds().includes(c.id);
+    const done = (isInactiveCustom || isHiddenBuiltin) ? false : isCompleted(c.id, completions);
+    if (!done && !isInactiveCustom && !isHiddenBuiltin) pendingCount++;
     let displayPack = c.pack;
     if (mergeWindow && c.pack === 'Weekly') displayPack = 'Daily';
     else if (isExpiryDay(c)) displayPack = 'Daily';
@@ -774,9 +803,13 @@ function render(opts) {
     if (incomplete.length > 0) packHtml = `<span class="harto-card-divider-wrap">${packHtml}</span>`;
     const incompleteHtml = incomplete.map((c, i) => {
       const isInactiveCustom = c.custom && c.active === false;
-      return renderCard(c, completions, false, i, { mergeWindow, expiryDay: isExpiryDay(c), displayPack: pack, draggable: !isInactiveCustom, isCustom: !!c.custom, isInactiveCustom });
+      const isHiddenBuiltin = !c.custom && getHiddenBuiltinIds().includes(c.id);
+      return renderCard(c, completions, false, i, { mergeWindow, expiryDay: isExpiryDay(c), displayPack: pack, draggable: !isInactiveCustom && !isHiddenBuiltin, isCustom: !!c.custom, isInactiveCustom, isHiddenBuiltin });
     }).join('');
-    const completedCards = completed.map((c, i) => renderCard(c, completions, true, incomplete.length + 1 + i, { mergeWindow, expiryDay: isExpiryDay(c), isCustom: !!c.custom, displayPack: pack }));
+    const completedCards = completed.map((c, i) => {
+      const isHiddenBuiltin = !c.custom && getHiddenBuiltinIds().includes(c.id);
+      return renderCard(c, completions, true, incomplete.length + 1 + i, { mergeWindow, expiryDay: isExpiryDay(c), isCustom: !!c.custom, displayPack: pack, isHiddenBuiltin });
+    });
     const completedWrapperClass = packExpanded[pack] ? 'harto-deck-completed-visible' : '';
     const completedInner = completedCards.join('');
     const completedHtml = completedCards.length > 0
@@ -905,6 +938,16 @@ function render(opts) {
     });
   });
 
+  deckEl.querySelectorAll('.harto-builtin-hide-btn').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = e.currentTarget.dataset.cardId;
+      if (!id) return;
+      toggleHiddenBuiltin(id);
+      render();
+    });
+  });
+
   deckEl.querySelectorAll('.harto-gift-code-copy').forEach((btn) => {
     btn.addEventListener('click', async (e) => {
       e.stopPropagation();
@@ -1028,11 +1071,13 @@ function openCustomModal(editId) {
   if (!modal || !form) return;
   const activeInput = document.getElementById('harto-custom-active');
   const activeRow = document.getElementById('harto-custom-active-row');
+  const imageInput = document.getElementById('harto-custom-image');
   if (editId) {
     const card = window.__HARTO_CARDS?.find((c) => c.custom && c.id === editId);
     if (card) {
       titleInput.value = card.title;
       descInput.value = card.description || '';
+      if (imageInput) imageInput.value = (card.image && card.image !== 'assets/images/placeholder.png') ? card.image : '';
       freqInput.value = card.pack === 'Others' ? 'Others' : card.pack;
       if (activeInput) activeInput.checked = card.active !== false;
       if (activeRow) activeRow.style.display = '';
@@ -1043,6 +1088,7 @@ function openCustomModal(editId) {
   } else {
     titleInput.value = '';
     descInput.value = '';
+    if (imageInput) imageInput.value = '';
     freqInput.value = 'Daily';
     if (activeInput) activeInput.checked = true;
     if (activeRow) activeRow.style.display = 'none';
@@ -1093,10 +1139,12 @@ function initCustomTasks() {
       if (!title) return;
       const pack = freqInput?.value || 'Daily';
       const editId = form.dataset.editId;
+      const imageInput = document.getElementById('harto-custom-image');
+      const imageVal = imageInput?.value?.trim() || '';
       if (editId) {
         const activeInput = document.getElementById('harto-custom-active');
         const active = activeInput ? activeInput.checked : true;
-        updateCustomCard(editId, { title, description: descInput?.value?.trim() || '', pack, active });
+        updateCustomCard(editId, { title, description: descInput?.value?.trim() || '', pack, active, image: imageVal || 'assets/images/placeholder.png' });
       } else {
         const card = {
           id: 'custom_' + Date.now(),
@@ -1109,7 +1157,7 @@ function initCustomTasks() {
           time: 'all',
           active: true,
           steps: 0,
-          image: 'assets/images/placeholder.png'
+          image: imageVal || 'assets/images/placeholder.png'
         };
         addCustomCard(card);
       }
@@ -1606,6 +1654,10 @@ function createShell() {
           <div class="harto-form-row">
             <label for="harto-custom-desc">Description</label>
             <textarea id="harto-custom-desc" rows="2" placeholder="Optional description"></textarea>
+          </div>
+          <div class="harto-form-row">
+            <label for="harto-custom-image">Image URL</label>
+            <input id="harto-custom-image" type="url" placeholder="https://... or leave empty for default">
           </div>
           <div class="harto-form-row">
             <label for="harto-custom-freq">Frequency</label>
