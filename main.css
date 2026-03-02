@@ -1,7 +1,7 @@
 /* Harto - Card-based To-Do for Heartopia */
 /* Version: 0.12.0 */
 
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Fredoka:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Fredoka:wght@400;500;600&family=Nunito:wght@400;500;600;700&display=swap');
 
 :root {
   --card-width: 180px;
@@ -99,7 +99,26 @@
   --body-bg: radial-gradient(circle at top left, #fbcfe8, #fef2f8 55%);
 }
 
-[data-setup="TW"] .harto-topbar-title-a {
+/* SEA setup: pink accent like Hatopia */
+[data-setup="SEA"] {
+  --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.06);
+  --card-shadow-hover: 0 10px 22px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(219, 39, 119, 0.2);
+  --accent: #db2777;
+  --accent-hover: #be185d;
+  --accent-soft: rgba(219, 39, 119, 0.18);
+  --accent-glow: rgba(219, 39, 119, 0.3);
+  --accent-purple: #ec4899;
+  --bg: #fef2f8;
+  --surface: #ffffff;
+  --text: #4c1d4a;
+  --text-muted: #831843;
+  --border: #fbcfe8;
+  --completed-bg: #fdf2f8;
+  --body-bg: radial-gradient(circle at top left, #fbcfe8, #fef2f8 55%);
+}
+
+[data-setup="TW"] .harto-topbar-title-a,
+[data-setup="SEA"] .harto-topbar-title-a {
   color: #9d174d;
 }
 
@@ -863,7 +882,7 @@ html:not([data-theme="dark"]) .harto-topbar {
 .harto-deck-view-list .harto-deck-cards {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 2px;
 }
 
 .harto-deck-view-list .harto-card {
@@ -917,6 +936,11 @@ html:not([data-theme="dark"]) .harto-topbar {
 .harto-deck-view-list .harto-card .harto-card-complete {
   opacity: 1;
   transform: scale(1);
+  width: 21px;
+  height: 21px;
+  font-size: 0.6rem;
+  border-radius: 5px;
+  border: 1px solid var(--border);
 }
 
 .harto-deck-view-list .harto-card-location-overlay {
@@ -981,6 +1005,13 @@ html:not([data-theme="dark"]) .harto-topbar {
 .harto-deck-view-list .harto-card-title {
   font-size: 0.875rem;
   font-weight: 400;
+  font-family: 'Nunito', system-ui, sans-serif;
+}
+
+.harto-deck-view-list .harto-card-body,
+.harto-deck-view-list .harto-card-meta,
+.harto-deck-view-list .harto-card-meta-badge {
+  font-family: 'Nunito', system-ui, sans-serif;
 }
 
 .harto-deck-view-list .harto-card-body {
@@ -995,6 +1026,10 @@ html:not([data-theme="dark"]) .harto-topbar {
 }
 
 /* List view: show body with description, meta, steps - align with title */
+.harto-deck-view-list .harto-card-meta {
+  display: none !important;
+}
+
 .harto-deck-view-list .harto-card-body {
   display: flex;
   flex-direction: column;
@@ -1026,6 +1061,14 @@ html:not([data-theme="dark"]) .harto-topbar {
   margin-top: 0;
 }
 
+/* List view: eye in flow next to info, one row; center that row vertically */
+.harto-deck-view-list .harto-card .harto-builtin-hide-btn {
+  position: static;
+  margin-left: 0;
+}
+.harto-deck-view-list .harto-card-content {
+  align-content: center;
+}
 .harto-deck-view-list .harto-builtin-hide-btn {
   width: 22px;
   height: 22px;
@@ -1122,6 +1165,12 @@ html:not([data-theme="dark"]) .harto-topbar {
 
 [data-setup="TW"] .harto-deck-view-list .harto-card-weekly-merge:hover {
   box-shadow: var(--card-shadow-hover), 0 0 24px rgba(236, 72, 153, 0.5), 0 0 50px rgba(219, 39, 119, 0.35);
+}
+
+[data-setup="SEA"] .harto-deck-view-list .harto-deck-pack,
+[data-setup="TW"] .harto-deck-view-list .harto-deck-pack {
+  border-left-width: 0;
+  border-top-width: 0;
 }
 
 .harto-deck-view-list .harto-deck-pack {
@@ -1424,6 +1473,13 @@ html:not([data-theme="dark"]) .harto-topbar {
 .harto-builtin-hide-btn svg {
   width: 14px;
   height: 14px;
+}
+
+/* Card view: eye at bottom-right (button lives in title row in DOM) */
+.harto-card .harto-builtin-hide-btn {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
 }
 
 .harto-card:hover .harto-builtin-hide-btn {

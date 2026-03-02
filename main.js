@@ -317,6 +317,10 @@ function completeCard(cardId, opts) {
   };
   setCompletions(completions);
 
+  if (getTaskView() === 'list') {
+    render(opts);
+    return;
+  }
   const packEl = opts?.flyToPack;
   const cardEl = document.querySelector(`.harto-card[data-id="${cardId}"]`);
   if (packEl && cardEl) {
@@ -342,10 +346,14 @@ function toggleStep(cardId, stepIndex, opts) {
   setCompletions(completions);
 
   const allDone = entry.stepsCompleted >= steps;
+  if (getTaskView() === 'list' || !allDone) {
+    render(opts);
+    return;
+  }
   const cardEl = document.querySelector(`.harto-card[data-id="${cardId}"]`);
   const section = cardEl?.closest('.harto-deck-section');
   const packEl = section?.querySelector('.harto-deck-pack');
-  if (allDone && packEl && cardEl) {
+  if (packEl && cardEl) {
     runCompleteAnimation(cardEl, packEl, opts);
   } else {
     render(opts);
@@ -353,6 +361,13 @@ function toggleStep(cardId, stepIndex, opts) {
 }
 
 function uncompleteCard(cardId, opts) {
+  if (getTaskView() === 'list') {
+    const completions = getCompletions();
+    delete completions[cardId];
+    setCompletions(completions);
+    render(opts);
+    return;
+  }
   const section = document.querySelector(`.harto-card[data-id="${cardId}"]`)?.closest('.harto-deck-section');
   const packEl = section?.querySelector('.harto-deck-pack');
   const cardEl = document.querySelector(`.harto-card[data-id="${cardId}"]`);
@@ -436,12 +451,13 @@ function renderCard(card, completions, done, index, opts) {
   const customClass = isCustom ? ' harto-card-custom' : '';
   const inactiveCustomClass = isInactiveCustom ? ' harto-card-inactive-custom' : '';
   const hiddenBuiltinClass = isHiddenBuiltin ? ' harto-card-hidden-builtin' : '';
+  const dealClass = (typeof getTaskView === 'function' && getTaskView() === 'list') ? '' : ' harto-card-dealing';
   const draggableAttr = draggable ? ' draggable="true"' : '';
   const displayPackAttr = draggable ? ` data-display-pack="${escapeHtml(displayPack)}"` : '';
   const dragHandle = draggable ? '<span class="harto-card-drag-handle" title="Drag to reorder">⋮⋮</span>' : '';
   const customIndicator = isCustom ? '<span class="harto-card-custom-indicator" aria-hidden="true"></span>' : '';
   return `
-    <div class="harto-card harto-card-dealing ${done ? 'harto-card-completed' : ''}${weeklyMergeClass}${customClass}${inactiveCustomClass}${hiddenBuiltinClass}"${draggableAttr}${displayPackAttr} data-id="${escapeHtml(card.id)}" data-pack="${escapeHtml(card.pack)}" data-deal-index="${index >= 0 ? index : 0}">
+    <div class="harto-card${dealClass} ${done ? 'harto-card-completed' : ''}${weeklyMergeClass}${customClass}${inactiveCustomClass}${hiddenBuiltinClass}"${draggableAttr}${displayPackAttr} data-id="${escapeHtml(card.id)}" data-pack="${escapeHtml(card.pack)}" data-deal-index="${index >= 0 ? index : 0}">
       ${customIndicator}${dragHandle}
       <div class="harto-card-content">
         <div class="harto-card-left">
@@ -451,14 +467,14 @@ function renderCard(card, completions, done, index, opts) {
         <div class="harto-card-right">
           ${isStepCard ? `<div class="harto-card-steps-row">${stepsHtml}</div>` : ''}
           <div class="harto-card-title-row">
-            <h3 class="harto-card-title">${escapeHtml(card.title)}${titleSuffix}${loc ? `<span class="harto-card-location-title-badge${expiredClass}">${escapeHtml(loc)}</span>` : ''}</h3>${(card.description && card.description.trim()) ? `<span class="harto-list-desc-trigger" data-desc="${escapeHtml(card.description)}">ℹ️</span>` : ''}
+            <h3 class="harto-card-title">${escapeHtml(card.title)}${titleSuffix}${loc ? `<span class="harto-card-location-title-badge${expiredClass}">${escapeHtml(loc)}</span>` : ''}</h3>${(card.description && card.description.trim()) ? `<span class="harto-list-desc-trigger" data-desc="${escapeHtml(card.description)}">ℹ️</span>` : ''}${builtinHideBtn}
             <span class="harto-card-complete-wrap harto-card-complete-inline">${completeBtn}</span>
           </div>
           <div class="harto-card-body">
           ${card.description ? `<p class="harto-card-description">${escapeHtml(card.description)}</p>` : ''}
           ${giftCodeHtml}
           ${customActionsBody}
-          <div class="harto-card-meta-footer-row">${metaBadges}${(isStepCard || builtinHideBtn) ? `<div class="harto-card-footer">${isStepCard ? stepsHtml : ''}${builtinHideBtn}</div>` : ''}</div>
+          <div class="harto-card-meta-footer-row">${metaBadges}${isStepCard ? `<div class="harto-card-footer">${stepsHtml}</div>` : ''}</div>
           </div>
         </div>
       </div>
@@ -832,17 +848,20 @@ function render(opts) {
     });
   });
 
-  if (opts?.affectedPack && opts?.oldRects) {
-    playFlipAnimation(deckEl, opts.affectedPack, opts.oldRects);
-  } else {
-    const isPackToggle = window.__HARTO_HAS_RENDERED;
-    if (window.__HARTO_HAS_RENDERED === undefined) window.__HARTO_HAS_RENDERED = false;
-    window.__HARTO_HAS_RENDERED = true;
-    const runDeal = () => playDealAnimation(deckEl);
-    isPackToggle ? setTimeout(runDeal, 50) : runDeal();
-  }
+  const isListView = getTaskView() === 'list';
+  if (!isListView) {
+    if (opts?.affectedPack && opts?.oldRects) {
+      playFlipAnimation(deckEl, opts.affectedPack, opts.oldRects);
+    } else {
+      const isPackToggle = window.__HARTO_HAS_RENDERED;
+      if (window.__HARTO_HAS_RENDERED === undefined) window.__HARTO_HAS_RENDERED = false;
+      window.__HARTO_HAS_RENDERED = true;
+      const runDeal = () => playDealAnimation(deckEl);
+      isPackToggle ? setTimeout(runDeal, 50) : runDeal();
+    }
 
-  initPendingDrag(deckEl);
+    initPendingDrag(deckEl);
+  }
 
   deckEl.querySelectorAll('.harto-card-complete').forEach((btn) => {
     btn.addEventListener('click', (e) => {
