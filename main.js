@@ -593,12 +593,18 @@ async function loadTrackerData() {
   } catch (_) {}
 }
 
+let __weatherDataPromise = null;
 async function loadWeatherData() {
-  try {
-    const res = await fetch(`${CDN}/info/weather.json`);
-    const data = await res.json();
-    if (data && typeof data === 'object') __weatherData = data;
-  } catch (_) {}
+  if (!__weatherDataPromise) {
+    __weatherDataPromise = (async () => {
+      try {
+        const res = await fetch(`${CDN}/info/weather.json`);
+        const data = await res.json();
+        if (data && typeof data === 'object') __weatherData = data;
+      } catch (_) {}
+    })();
+  }
+  await __weatherDataPromise;
 }
 
 function getCurrentSeason() {

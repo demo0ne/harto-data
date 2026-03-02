@@ -306,6 +306,20 @@
       "timeLimited": false,
       "expiryDate": "",
       "steps": 0
+    },
+    {
+      "id": "gift-code-n5q7m9l2a4",
+      "pack": "Others",
+      "title": "🎁 Code : n5q7m9l2a4",
+      "description": "n5q7m9l2a4",
+      "image": "assets/images/placeholder.png",
+      "season": "always",
+      "weather": "any",
+      "time": "all",
+      "active": true,
+      "timeLimited": true,
+      "expiryDate": "2026-03-31",
+      "steps": 0
     }
   ]
 }
