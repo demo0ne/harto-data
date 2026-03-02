@@ -2311,13 +2311,14 @@ html:not([data-theme="dark"]) .harto-topbar {
   font-size: 0.7rem;
   line-height: 1.35;
   color: var(--text-muted);
-  text-align: center;
+  text-align: left;
   overflow: auto;
   border-radius: 6px;
   background: var(--surface);
   border: 1px solid var(--border);
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
+  align-items: flex-start;
   white-space: pre-line;
 }
 
