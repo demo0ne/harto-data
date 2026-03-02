@@ -281,9 +281,10 @@
     },
     {
       "id": "winter-weekly",
-      "pack": "Others",
-      "title": "❄️ Weekly",
+      "pack": "Weekly",
+      "title": "❄️ Weekly Challenges",
       "description": "",
+      "giftCode": "",
       "image": "assets/images/placeholder.png",
       "season": "winter",
       "weather": "any",
