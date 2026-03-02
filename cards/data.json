@@ -309,9 +309,10 @@
     },
     {
       "id": "gift-code-n5q7m9l2a4",
-      "pack": "Others",
+      "pack": "Gift Codes",
       "title": "🎁 Code : n5q7m9l2a4",
-      "description": "n5q7m9l2a4",
+      "description": "🎁Rewards:Wishing Star ×5,Mermaid Fish Attractor ×3,Fertilizer ×10",
+      "giftCode": "n5q7m9l2a4",
       "image": "assets/images/placeholder.png",
       "season": "always",
       "weather": "any",

@@ -1,5 +1,5 @@
 /* Harto - Card-based To-Do for Heartopia */
-/* Version: 0.11.8 */
+/* Version: 0.11.9 */
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Fredoka:wght@400;500;600&display=swap');
 
@@ -1021,6 +1021,11 @@ html:not([data-theme="dark"]) .harto-topbar {
   max-height: none;
 }
 
+.harto-deck-view-list .harto-gift-code-wrap {
+  max-height: 3em;
+  opacity: 1;
+}
+
 .harto-deck-view-list .harto-card-meta {
   display: flex;
   gap: 0.35rem;
@@ -1595,6 +1600,61 @@ html:not([data-theme="dark"]) .harto-topbar {
 .harto-card:hover .harto-card-description {
   max-height: 4.5em;
   opacity: 1;
+}
+
+.harto-gift-code-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.35rem 0;
+  padding: 0.35rem 0.5rem;
+  background: var(--accent-soft);
+  border-radius: 8px;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.2s ease, opacity 0.2s ease;
+}
+
+.harto-card:hover .harto-gift-code-wrap {
+  max-height: 3em;
+  opacity: 1;
+}
+
+.harto-gift-code {
+  font-family: ui-monospace, monospace;
+  font-size: 0.7rem;
+  color: var(--text);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.harto-gift-code-copy {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.harto-gift-code-copy:hover {
+  background: var(--accent-hover);
+  transform: scale(1.05);
+}
+
+.harto-gift-code-copy.harto-gift-code-copied {
+  background: #22c55e;
 }
 
 .harto-card-complete {

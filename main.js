@@ -1,11 +1,11 @@
 /**
  * Harto - Card-based To-Do for Heartopia
- * Version: 0.11.7
+ * Version: 0.11.9
  */
 
 const HARTO_RAW = 'https://raw.githubusercontent.com/demo0ne/harto-data/main';
 const CDN = (typeof window !== 'undefined' && window.__HARTO_BASE) ? window.__HARTO_BASE : HARTO_RAW;
-const VERSION = '0.11.7';
+const VERSION = '0.11.9';
 if (typeof window !== 'undefined') window.__HARTO_VERSION_JS = VERSION;
 const STORAGE_COMPLETIONS = 'harto_completions';
 const STORAGE_COMPLETIONS_TW = 'harto_completions_tw';
@@ -414,6 +414,12 @@ function renderCard(card, completions, done, index, opts) {
   const time = card.time || 'all';
   const timeRange = (SPECIAL_WEATHER.includes(weather) && time !== 'all') ? getTimeSlotRange(time) : '';
   const titleSuffix = timeRange ? ` <span class="harto-card-title-time">(${timeRange})</span>` : '';
+  const giftCodeHtml = (card.giftCode && String(card.giftCode).trim())
+    ? `<div class="harto-gift-code-wrap">
+        <code class="harto-gift-code">${escapeHtml(String(card.giftCode).trim())}</code>
+        <button type="button" class="harto-gift-code-copy" data-gift-code="${escapeHtml(String(card.giftCode).trim())}" title="Copy to clipboard" aria-label="Copy gift code">📋</button>
+      </div>`
+    : '';
   const metaBadges = `<div class="harto-card-meta">
     <span class="harto-card-meta-badge" data-meta="season"><span class="harto-card-meta-label">Season:</span> ${escapeHtml(season)}</span>
     <span class="harto-card-meta-badge" data-meta="weather"><span class="harto-card-meta-label">Weather:</span> ${escapeHtml(weather)}</span>
@@ -442,6 +448,7 @@ function renderCard(card, completions, done, index, opts) {
           </div>
           <div class="harto-card-body">
           ${card.description ? `<p class="harto-card-description">${escapeHtml(card.description)}</p>` : ''}
+          ${giftCodeHtml}
           ${metaBadges}
           ${customActionsBody}
           ${isStepCard ? stepsHtml : ''}
@@ -580,7 +587,7 @@ function renderPack(packName, hasCompleted, completedCount, isExpanded) {
   `;
 }
 
-const PACKS = ['All', 'Daily', 'Daily-NPC', 'Weekly', 'Others'];
+const PACKS = ['All', 'Daily', 'Daily-NPC', 'Weekly', 'Gift Codes', 'Others'];
 
 let __weatherData = null;
 let __trackerData = null;
@@ -895,6 +902,37 @@ function render(opts) {
       if (action === 'edit') openCustomModal(id);
       else if (action === 'inactive') setCustomInactive(id);
       else if (action === 'delete') deleteCustomCard(id);
+    });
+  });
+
+  deckEl.querySelectorAll('.harto-gift-code-copy').forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const el = e.currentTarget;
+      const code = el.dataset.giftCode;
+      if (!code) return;
+      try {
+        await navigator.clipboard.writeText(code);
+        const orig = el.textContent;
+        el.textContent = '✓';
+        el.classList.add('harto-gift-code-copied');
+        setTimeout(() => { el.textContent = orig; el.classList.remove('harto-gift-code-copied'); }, 1200);
+      } catch {
+        const ta = document.createElement('textarea');
+        ta.value = code;
+        ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand('copy');
+          const orig = el.textContent;
+          el.textContent = '✓';
+          el.classList.add('harto-gift-code-copied');
+          setTimeout(() => { el.textContent = orig; el.classList.remove('harto-gift-code-copied'); }, 1200);
+        } finally {
+          document.body.removeChild(ta);
+        }
+      }
     });
   });
 
