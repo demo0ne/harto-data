@@ -1,6 +1,6 @@
 /**
  * Harto - Card-based To-Do for Heartopia
- * Version: 0.12.0
+ * Version: 0.13.0
  */
 
 const HARTO_RAW = 'https://raw.githubusercontent.com/demo0ne/harto-data/main';
@@ -1272,16 +1272,29 @@ function renderGuidesGallery(guides) {
   gallery.innerHTML = guides.map((g) => {
     const items = [];
     const coverSrc = guideImageUrl(g.id, 'cover.png');
-    (g.pages || []).forEach((p) => {
-      const label = p.title || '';
-      const description = (p.text || '').trim();
-      if (p.image) {
-        items.push({ src: guideImageUrl(g.id, p.image), alt: p.imageAlt || p.title, label, description });
-      } else {
-        items.push({ src: null, label, description });
-      }
-    });
+    if (g.linkOnly) {
+      (g.pages || []).forEach((p) => {
+        items.push({ isLink: true, label: p.title || '', url: (p.url || '').trim() });
+      });
+    } else {
+      (g.pages || []).forEach((p) => {
+        const label = p.title || '';
+        const description = (p.text || '').trim();
+        if (p.image) {
+          items.push({ src: guideImageUrl(g.id, p.image), alt: p.imageAlt || p.title, label, description });
+        } else {
+          items.push({ src: null, label, description });
+        }
+      });
+    }
     const gridHtml = items.map((item) => {
+      if (item.isLink) {
+        const url = item.url || '#';
+        return `<div class="harto-guides-gallery-item harto-guides-gallery-item-link">
+          <span class="harto-guides-gallery-label">${escapeHtml(item.label)}</span>
+          <button type="button" class="harto-guides-gallery-open-url" data-url="${escapeHtml(url)}" title="Open link" aria-label="Open link">🔗</button>
+        </div>`;
+      }
       if (item.src) {
         return `<button type="button" class="harto-guides-gallery-item" tabindex="0">
           <span class="harto-guides-gallery-label">${escapeHtml(item.label)}</span>
@@ -1308,19 +1321,30 @@ function renderGuidesGallery(guides) {
 function buildGuidePages(guide) {
   const base = (p) => guideImageUrl(guide.id, p);
   const pages = [];
-  // Page 0: Title and cover
-  const coverImg = base('cover.png');
-  pages.push({ html: `<div class="harto-guide-page harto-guide-cover"><h3 class="harto-guide-cover-title">${escapeHtml(guide.title)}</h3><div class="harto-guide-cover-img-wrap"><img src="${coverImg}" alt="" class="harto-guide-cover-img" onerror="this.style.display='none'"></div></div>`, density: 'hard' });
-  // Page 1: Empty (no image on TOC)
-  pages.push({ html: '<div class="harto-guide-page harto-guide-blank"></div>', density: 'hard' });
-  // Page 2: TOC (content sections start at page 3)
   const padNum = (n) => String(n + 1).padStart(2, '0');
+  const coverImg = base('cover.png');
+
+  if (guide.linkOnly) {
+    // Link-only guide: cover, blank, single TOC page (links open URL), back cover
+    pages.push({ html: `<div class="harto-guide-page harto-guide-cover"><h3 class="harto-guide-cover-title">${escapeHtml(guide.title)}</h3><div class="harto-guide-cover-img-wrap"><img src="${coverImg}" alt="" class="harto-guide-cover-img" onerror="this.style.display='none'"></div></div>`, density: 'hard' });
+    pages.push({ html: '<div class="harto-guide-page harto-guide-blank"></div>', density: 'hard' });
+    const tocItems = (guide.pages || []).map((p, i) => {
+      const url = (p.url || '').trim();
+      return `<a href="#" class="harto-guide-toc-link harto-guide-toc-link-url" data-url="${escapeHtml(url)}"><span class="harto-guide-toc-num">${padNum(i)}</span> ${escapeHtml(p.title || '')}</a>`;
+    }).join('');
+    pages.push({ html: `<div class="harto-guide-page harto-guide-toc-page"><h4>Table of Contents</h4><div class="harto-guide-toc">${tocItems}</div></div>`, density: 'hard' });
+    pages.push({ html: `<div class="harto-guide-page harto-guide-cover"><h3 class="harto-guide-cover-title">${escapeHtml(guide.title)}</h3></div>`, density: 'hard' });
+    return pages;
+  }
+
+  // Normal guide: cover, blank, TOC, content pages, back cover
+  pages.push({ html: `<div class="harto-guide-page harto-guide-cover"><h3 class="harto-guide-cover-title">${escapeHtml(guide.title)}</h3><div class="harto-guide-cover-img-wrap"><img src="${coverImg}" alt="" class="harto-guide-cover-img" onerror="this.style.display='none'"></div></div>`, density: 'hard' });
+  pages.push({ html: '<div class="harto-guide-page harto-guide-blank"></div>', density: 'hard' });
   const tocItems = (guide.pages || []).map((p, i) => {
-    const targetPage = 3 + i * 2; // odd pages: title+desc
+    const targetPage = 3 + i * 2;
     return `<a href="#" class="harto-guide-toc-link" data-page="${targetPage}"><span class="harto-guide-toc-num">${padNum(i)}</span> ${escapeHtml(p.title)}</a>`;
   }).join('');
   pages.push({ html: `<div class="harto-guide-page harto-guide-toc-page"><h4>Table of Contents</h4><div class="harto-guide-toc">${tocItems}</div></div>`, density: 'hard' });
-  // Pages 3,5,7...: Title and Description; 4,6,8...: Page image
   (guide.pages || []).forEach((p, i) => {
     pages.push({ html: `<div class="harto-guide-page"><h4><span class="harto-guide-page-num">${padNum(i)}</span> ${escapeHtml(p.title)}</h4><p>${escapeHtml(p.text)}</p></div>`, density: 'hard' });
     const imgUrl = base(p.image);
@@ -1371,6 +1395,11 @@ function openGuide(guide) {
     el.querySelectorAll('.harto-guide-toc-link').forEach((a) => {
       a.addEventListener('click', (e) => {
         e.preventDefault();
+        const url = a.dataset.url;
+        if (url) {
+          window.open(url, '_blank');
+          return;
+        }
         const page = parseInt(a.dataset.page, 10);
         if (!isNaN(page)) __guidePageFlip.turnToPage(page);
       });
@@ -1464,6 +1493,14 @@ function initGuides() {
         gallery?.classList.toggle('harto-guides-gallery-has-expanded', !isCollapsed);
         group.classList.toggle('harto-guides-gallery-group-expanded', !isCollapsed);
       }
+      return;
+    }
+    const urlBtn = e.target.closest('.harto-guides-gallery-open-url');
+    if (urlBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const url = urlBtn.dataset.url;
+      if (url && url !== '#') window.open(url, '_blank');
       return;
     }
     const item = e.target.closest('.harto-guides-gallery-item');

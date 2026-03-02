@@ -1,5 +1,5 @@
 /* Harto - Card-based To-Do for Heartopia */
-/* Version: 0.12.0 */
+/* Version: 0.13.0 */
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Fredoka:wght@400;500;600&family=Nunito:wght@400;500;600;700&display=swap');
 
@@ -2336,6 +2336,42 @@ html:not([data-theme="dark"]) .harto-topbar {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+}
+
+.harto-guides-gallery-item-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0;
+  border-radius: 8px;
+}
+
+.harto-guides-gallery-open-url {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--accent);
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.harto-guides-gallery-open-url:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.harto-guide-toc-link-url::after {
+  content: ' ↗';
+  font-size: 0.85em;
+  opacity: 0.8;
 }
 
 /* Guides – bookshelf */

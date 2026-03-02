@@ -139,6 +139,21 @@
           "image": ""
         }
       ]
+    },
+    {
+      "id": "links-guide",
+      "title": "🌐 Links",
+      "active": true,
+      "timeLimited": false,
+      "expiryDate": null,
+      "linkOnly": true,
+      "tocImage": "",
+      "pages": [
+        {
+          "title": "Google Sheet",
+          "url": "https://docs.google.com/spreadsheets/d/1aQhlEsigEA1Kbybvnm8J1RIygAwFQ1xLLE4c9Z_2IaI/edit?gid=900749870#gid=900749870"
+        }
+      ]
     }
   ]
 }
