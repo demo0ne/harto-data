@@ -1273,16 +1273,27 @@ function renderGuidesGallery(guides) {
     const items = [];
     const coverSrc = guideImageUrl(g.id, 'cover.png');
     (g.pages || []).forEach((p) => {
+      const label = p.title || '';
+      const description = (p.text || '').trim();
       if (p.image) {
-        items.push({ src: guideImageUrl(g.id, p.image), alt: p.imageAlt || p.title, label: p.title });
+        items.push({ src: guideImageUrl(g.id, p.image), alt: p.imageAlt || p.title, label, description });
+      } else {
+        items.push({ src: null, label, description });
       }
     });
-    const gridHtml = items.map((item) =>
-      `<button type="button" class="harto-guides-gallery-item" tabindex="0">
-        <img src="${item.src}" alt="${escapeHtml(item.alt)}" onerror="this.style.display='none'">
+    const gridHtml = items.map((item) => {
+      if (item.src) {
+        return `<button type="button" class="harto-guides-gallery-item" tabindex="0">
+          <span class="harto-guides-gallery-label">${escapeHtml(item.label)}</span>
+          <img src="${item.src}" alt="${escapeHtml(item.alt || '')}" onerror="this.style.display='none';var s=this.nextElementSibling;if(s)s.classList.add('harto-guides-gallery-fallback-visible');">
+          <span class="harto-guides-gallery-fallback">${escapeHtml(item.description)}</span>
+        </button>`;
+      }
+      return `<button type="button" class="harto-guides-gallery-item harto-guides-gallery-item-text" tabindex="0">
         <span class="harto-guides-gallery-label">${escapeHtml(item.label)}</span>
-      </button>`
-    ).join('');
+        <span class="harto-guides-gallery-fallback harto-guides-gallery-fallback-visible">${escapeHtml(item.description)}</span>
+      </button>`;
+    }).join('');
     return `<div class="harto-guides-gallery-group harto-guides-gallery-group-collapsed" data-guide-id="${escapeHtml(g.id)}">
       <button type="button" class="harto-guides-gallery-cover" aria-expanded="false" title="${escapeHtml(g.title)}">
         <img src="${coverSrc}" alt="${escapeHtml(g.title)}" onerror="this.src='${CDN}/assets/images/hatopia.png'">
@@ -1438,7 +1449,7 @@ function initGuides() {
   viewBooksBtn?.addEventListener('click', () => setGuidesView('books'));
   viewGalleryBtn?.addEventListener('click', () => setGuidesView('gallery'));
 
-  renderGuidesBookshelf(guides);
+  setGuidesView('gallery');
 
   gallery?.addEventListener('click', (e) => {
     const coverBtn = e.target.closest('.harto-guides-gallery-cover');
@@ -1457,7 +1468,7 @@ function initGuides() {
     }
     const item = e.target.closest('.harto-guides-gallery-item');
     const img = item?.querySelector('img');
-    if (img?.src) {
+    if (img?.src && img.style.display !== 'none') {
       e.preventDefault();
       openImageModal(img.src);
     }
@@ -1664,11 +1675,11 @@ function createShell() {
       </div>
       <div id="harto-guides" class="harto-tab-panel">
         <div class="harto-guides-toolbar">
-          <button id="harto-guides-view-books" class="harto-guides-view-btn active" data-view="books">Books</button>
-          <button id="harto-guides-view-gallery" class="harto-guides-view-btn" data-view="gallery">Gallery</button>
+          <button id="harto-guides-view-gallery" class="harto-guides-view-btn active" data-view="gallery">Gallery</button>
+          <button id="harto-guides-view-books" class="harto-guides-view-btn" data-view="books">Books</button>
         </div>
-        <div id="harto-guides-bookshelf" class="harto-guides-bookshelf"></div>
-        <div id="harto-guides-gallery" class="harto-guides-gallery" style="display:none"></div>
+        <div id="harto-guides-bookshelf" class="harto-guides-bookshelf" style="display:none"></div>
+        <div id="harto-guides-gallery" class="harto-guides-gallery"></div>
         <div id="harto-guides-reader" class="harto-guides-reader" style="display:none">
           <div class="harto-guides-reader-header">
             <button id="harto-guides-back" class="harto-guides-back">← Back to shelf</button>
