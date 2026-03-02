@@ -897,7 +897,7 @@ html:not([data-theme="dark"]) .harto-topbar {
 .harto-deck-view-list .harto-card-left .harto-card-complete-wrap {
   position: absolute;
   inset: 0;
-  z-index: 0;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -906,19 +906,17 @@ html:not([data-theme="dark"]) .harto-topbar {
 .harto-deck-view-list .harto-card-image-wrap {
   position: absolute;
   inset: 0;
-  z-index: 1;
-  transition: transform 0.25s ease;
+  z-index: 0;
+  pointer-events: none;
 }
 
-.harto-deck-view-list .harto-card:hover .harto-card-image-wrap {
-  transform: translateX(-100%);
+.harto-deck-view-list .harto-card-image-wrap > * {
+  display: none !important;
 }
 
-.harto-deck-view-list .harto-card-image-wrap .harto-card-image {
-  width: 100%;
-  height: 100%;
-  min-height: 4rem;
-  object-fit: cover;
+.harto-deck-view-list .harto-card .harto-card-complete {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .harto-deck-view-list .harto-card-location-overlay {
@@ -1007,9 +1005,7 @@ html:not([data-theme="dark"]) .harto-topbar {
 }
 
 .harto-deck-view-list .harto-card-description {
-  font-size: 0.7rem;
-  max-height: none;
-  opacity: 1;
+  display: none;
   color: var(--text-muted);
   -webkit-line-clamp: 2;
   display: -webkit-box;

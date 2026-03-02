@@ -267,9 +267,10 @@
     },
     {
       "id": "fashionwave-memory",
-      "pack": "Others",
+      "pack": "Weekly",
       "title": "📖 Fashionwave  Memory 5",
       "description": "Pic 📷 in a house part 🏠🎉\nPic 📷 in Concert 🎤🎶",
+      "giftCode": "",
       "image": "assets/images/Others/fashion_wave_memo.png",
       "season": "winter",
       "weather": "any",

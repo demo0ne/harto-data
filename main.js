@@ -441,7 +441,7 @@ function renderCard(card, completions, done, index, opts) {
   const dragHandle = draggable ? '<span class="harto-card-drag-handle" title="Drag to reorder">⋮⋮</span>' : '';
   const customIndicator = isCustom ? '<span class="harto-card-custom-indicator" aria-hidden="true"></span>' : '';
   return `
-    <div class="harto-card harto-card-dealing ${done ? 'harto-card-completed' : ''}${weeklyMergeClass}${customClass}${inactiveCustomClass}${hiddenBuiltinClass}"${draggableAttr}${displayPackAttr} data-id="${escapeHtml(card.id)}" data-pack="${escapeHtml(card.pack)}" data-deal-index="${index >= 0 ? index : 0}">
+    <div class="harto-card harto-card-dealing ${done ? 'harto-card-completed' : ''}${weeklyMergeClass}${customClass}${inactiveCustomClass}${hiddenBuiltinClass}"${draggableAttr}${displayPackAttr} data-id="${escapeHtml(card.id)}" data-pack="${escapeHtml(card.pack)}" data-deal-index="${index >= 0 ? index : 0}"${card.description ? ` title="${escapeHtml(card.description)}"` : ''}>
       ${customIndicator}${dragHandle}
       <div class="harto-card-content">
         <div class="harto-card-left">
