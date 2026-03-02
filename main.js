@@ -441,7 +441,7 @@ function renderCard(card, completions, done, index, opts) {
   const dragHandle = draggable ? '<span class="harto-card-drag-handle" title="Drag to reorder">⋮⋮</span>' : '';
   const customIndicator = isCustom ? '<span class="harto-card-custom-indicator" aria-hidden="true"></span>' : '';
   return `
-    <div class="harto-card harto-card-dealing ${done ? 'harto-card-completed' : ''}${weeklyMergeClass}${customClass}${inactiveCustomClass}${hiddenBuiltinClass}"${draggableAttr}${displayPackAttr} data-id="${escapeHtml(card.id)}" data-pack="${escapeHtml(card.pack)}" data-deal-index="${index >= 0 ? index : 0}"${card.description ? ` title="${escapeHtml(card.description)}"` : ''}>
+    <div class="harto-card harto-card-dealing ${done ? 'harto-card-completed' : ''}${weeklyMergeClass}${customClass}${inactiveCustomClass}${hiddenBuiltinClass}"${draggableAttr}${displayPackAttr} data-id="${escapeHtml(card.id)}" data-pack="${escapeHtml(card.pack)}" data-deal-index="${index >= 0 ? index : 0}">
       ${customIndicator}${dragHandle}
       <div class="harto-card-content">
         <div class="harto-card-left">
@@ -451,15 +451,14 @@ function renderCard(card, completions, done, index, opts) {
         <div class="harto-card-right">
           ${isStepCard ? `<div class="harto-card-steps-row">${stepsHtml}</div>` : ''}
           <div class="harto-card-title-row">
-            <h3 class="harto-card-title">${escapeHtml(card.title)}${titleSuffix}${loc ? `<span class="harto-card-location-title-badge${expiredClass}">${escapeHtml(loc)}</span>` : ''}</h3>
+            <h3 class="harto-card-title">${escapeHtml(card.title)}${titleSuffix}${loc ? `<span class="harto-card-location-title-badge${expiredClass}">${escapeHtml(loc)}</span>` : ''}</h3>${(card.description && card.description.trim()) ? `<span class="harto-list-desc-trigger" data-desc="${escapeHtml(card.description)}">ℹ️</span>` : ''}
             <span class="harto-card-complete-wrap harto-card-complete-inline">${completeBtn}</span>
           </div>
           <div class="harto-card-body">
           ${card.description ? `<p class="harto-card-description">${escapeHtml(card.description)}</p>` : ''}
           ${giftCodeHtml}
-          ${metaBadges}
           ${customActionsBody}
-          ${(isStepCard || builtinHideBtn) ? `<div class="harto-card-footer">${isStepCard ? stepsHtml : ''}${builtinHideBtn}</div>` : ''}
+          <div class="harto-card-meta-footer-row">${metaBadges}${(isStepCard || builtinHideBtn) ? `<div class="harto-card-footer">${isStepCard ? stepsHtml : ''}${builtinHideBtn}</div>` : ''}</div>
           </div>
         </div>
       </div>
@@ -978,6 +977,31 @@ function render(opts) {
       }
     });
   });
+
+  if (deckEl.classList.contains('harto-deck-view-list')) {
+    let tooltipEl = document.querySelector('.harto-list-tooltip');
+    if (!tooltipEl) {
+      tooltipEl = document.createElement('div');
+      tooltipEl.className = 'harto-list-tooltip';
+      tooltipEl.style.display = 'none';
+      document.body.appendChild(tooltipEl);
+    }
+    deckEl.querySelectorAll('.harto-list-desc-trigger').forEach((trigger) => {
+      trigger.addEventListener('mouseenter', (e) => {
+        const desc = e.currentTarget.getAttribute('data-desc');
+        if (!desc) return;
+        tooltipEl.textContent = desc;
+        tooltipEl.style.display = 'block';
+        const rect = e.currentTarget.getBoundingClientRect();
+        tooltipEl.style.left = `${rect.left}px`;
+        tooltipEl.style.top = `${rect.top}px`;
+        tooltipEl.style.transform = 'translateY(-100%)';
+      });
+      trigger.addEventListener('mouseleave', () => {
+        tooltipEl.style.display = 'none';
+      });
+    });
+  }
 
   deckEl.querySelectorAll('.harto-card-step').forEach((btn) => {
     btn.addEventListener('click', (e) => {

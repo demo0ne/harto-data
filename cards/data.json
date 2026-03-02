@@ -293,7 +293,7 @@
       "active": true,
       "timeLimited": false,
       "expiryDate": "",
-      "steps": 10
+      "steps": 0
     },
     {
       "id": "home-eval",

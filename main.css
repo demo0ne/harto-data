@@ -870,14 +870,14 @@ html:not([data-theme="dark"]) .harto-topbar {
   width: 100%;
   max-width: 100%;
   aspect-ratio: unset;
-  min-height: 4rem;
+  min-height: 3rem;
   flex-direction: row;
 }
 
 .harto-deck-view-list .harto-card-content {
   display: grid;
   grid-template-columns: 4rem 1fr;
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto auto auto;
   flex: 1;
   min-width: 0;
 }
@@ -973,14 +973,14 @@ html:not([data-theme="dark"]) .harto-topbar {
 .harto-deck-view-list .harto-card-title-row {
   grid-column: 2;
   grid-row: 2;
-  padding: 0.35rem 0.75rem 0.15rem;
+  padding: 0.2rem 0.75rem 0.05rem;
   align-items: center;
-  padding: 0.5rem 0.75rem 0.25rem;
   order: unset;
 }
 
 .harto-deck-view-list .harto-card-title {
-  font-size: 1.1rem;
+  font-size: 0.875rem;
+  font-weight: 400;
 }
 
 .harto-deck-view-list .harto-card-body {
@@ -998,23 +998,76 @@ html:not([data-theme="dark"]) .harto-topbar {
 .harto-deck-view-list .harto-card-body {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  padding: 0 0.75rem 0.5rem;
+  gap: 0.15rem;
+  padding: 0 0.75rem 0.25rem;
   flex: 1;
   min-width: 0;
 }
 
-.harto-deck-view-list .harto-card-description {
-  display: none;
-  color: var(--text-muted);
-  -webkit-line-clamp: 2;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+.harto-deck-view-list .harto-card-meta-footer-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  min-height: 0;
 }
 
-.harto-deck-view-list .harto-card:hover .harto-card-description {
-  max-height: none;
+.harto-deck-view-list .harto-card-meta-footer-row .harto-card-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.harto-deck-view-list .harto-card-meta-footer-row .harto-card-footer {
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.harto-deck-view-list .harto-card-footer {
+  margin-top: 0;
+}
+
+.harto-deck-view-list .harto-builtin-hide-btn {
+  width: 22px;
+  height: 22px;
+}
+
+.harto-deck-view-list .harto-builtin-hide-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.harto-list-desc-trigger {
+  display: none;
+  cursor: help;
+  margin-left: 0.35rem;
+  font-size: 0.85em;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+.harto-deck-view-list .harto-card .harto-card-title-row .harto-list-desc-trigger {
+  display: inline !important;
+}
+
+.harto-list-tooltip {
+  position: fixed;
+  z-index: 10000;
+  display: none;
+  max-width: min(320px, 90vw);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--card-shadow-hover);
+  white-space: normal;
+  word-wrap: break-word;
+  pointer-events: none;
+}
+
+.harto-deck-view-list .harto-card-description {
+  display: none !important;
 }
 
 .harto-deck-view-list .harto-gift-code-wrap {
@@ -1024,8 +1077,13 @@ html:not([data-theme="dark"]) .harto-topbar {
 
 .harto-deck-view-list .harto-card-meta {
   display: flex;
-  gap: 0.35rem;
+  gap: 0.25rem;
   flex-wrap: wrap;
+}
+
+.harto-deck-view-list .harto-card-meta-badge {
+  font-size: 0.55rem;
+  padding: 0.1rem 0.3rem;
 }
 
 .harto-card-meta-badge {
