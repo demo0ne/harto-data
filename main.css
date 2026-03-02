@@ -1351,6 +1351,7 @@ html:not([data-theme="dark"]) .harto-topbar {
 
 .harto-builtin-hide-btn {
   flex-shrink: 0;
+  margin-left: auto;
   width: 26px;
   height: 26px;
   padding: 0;
