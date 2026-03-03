@@ -166,6 +166,22 @@
           "url": "https://heartopia.life/guides/map/"
         }
       ]
+    },
+    {
+      "id": "pets-guide",
+      "title": "🐶 Pets Guide",
+      "active": true,
+      "timeLimited": false,
+      "expiryDate": null,
+      "linkOnly": false,
+      "tocImage": "image.png",
+      "pages": [
+        {
+          "title": "Pet Traits",
+          "text": "Some info about pet traits",
+          "image": "image.png"
+        }
+      ]
     }
   ]
 }
