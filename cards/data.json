@@ -323,6 +323,21 @@
       "timeLimited": true,
       "expiryDate": "2026-03-31",
       "steps": 0
+    },
+    {
+      "id": "gift-code-tangyuan0303y",
+      "pack": "Gift Codes",
+      "title": "🎁 Gift Code : tangyuan0303y",
+      "description": "tangyuan0303y",
+      "giftCode": "tangyuan0303y",
+      "image": "assets/images/placeholder.png",
+      "season": "always",
+      "weather": "any",
+      "time": "all",
+      "active": true,
+      "timeLimited": true,
+      "expiryDate": "2026-04-30",
+      "steps": 0
     }
   ]
 }
