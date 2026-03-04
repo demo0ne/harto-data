@@ -182,6 +182,42 @@
           "image": "image.png"
         }
       ]
+    },
+    {
+      "id": "rainbow-flower-loc",
+      "title": "🌈 Rainbow Bouquet",
+      "active": true,
+      "timeLimited": false,
+      "expiryDate": null,
+      "linkOnly": false,
+      "tocImage": "rainbow_fishing.jpg",
+      "pages": [
+        {
+          "title": "Fishing Village",
+          "text": "Flower location in Fishing Village",
+          "image": "rainbow_fishing.jpg"
+        },
+        {
+          "title": "Flower FIelds",
+          "text": "Location in Flower fields",
+          "image": "rainbow_flower.jpg"
+        },
+        {
+          "title": "Forest",
+          "text": "location in forest",
+          "image": "rainbow_forest.jpg"
+        },
+        {
+          "title": "Onsen Mountain",
+          "text": "location in Onsen",
+          "image": "rainbow_onsen.jpg"
+        },
+        {
+          "title": "Central Town",
+          "text": "location in the Central area town",
+          "image": "rainbow_town.jpg"
+        }
+      ]
     }
   ]
 }
