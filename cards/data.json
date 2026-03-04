@@ -223,11 +223,14 @@
       "pack": "Daily",
       "title": "🌈 Bouquet💐",
       "description": "Pop 3 rainbow bouquet. One in front of your home. and the other 2 near the 🌈",
-      "image": "assets/images/placeholder.png",
+      "giftCode": "",
+      "image": "assets/images/Daily/rainbow_bouquet.png",
       "season": "always",
       "weather": "rainbow",
       "time": "all",
       "active": true,
+      "timeLimited": false,
+      "expiryDate": "",
       "steps": 0
     },
     {
