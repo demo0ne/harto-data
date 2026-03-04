@@ -1,7 +1,7 @@
 {
   "season": "winter",
-  "dawn": "rain",
-  "day": "rainbow",
+  "dawn": "sunny",
+  "day": "sunny",
   "dusk": "sunny",
   "night": "sunny"
 }
