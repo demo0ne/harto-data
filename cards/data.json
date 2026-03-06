@@ -50,11 +50,14 @@
       "pack": "Daily",
       "title": "🌴 Rainbow Tree",
       "description": "MLP Collab. Collect Gems from friends then water the tree.",
+      "giftCode": "",
       "image": "assets/images/Daily/rainbow_tree.png",
       "season": "always",
       "weather": "any",
       "time": "all",
-      "active": true,
+      "active": false,
+      "timeLimited": false,
+      "expiryDate": "",
       "steps": 2
     },
     {
